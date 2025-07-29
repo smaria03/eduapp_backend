@@ -57,3 +57,40 @@ build-iPhoneSimulator/
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+.env
+
+# === macOS ===
+.DS_Store
+
+# === JetBrains / RubyMine ===
+.idea/
+*.iml
+
+# === Logs ===
+log/*.log
+log/*.pid
+log/*.gz
+
+# === Cache / tmp ===
+tmp/
+*.swp
+
+# === RuboCop ===
+.rubocop-*
+.rubocop_todo.yml
+
+# === Bundler ===
+/vendor/bundle
+*.gem
+*.lock
+
+# === Byebug ===
+.byebug_history
+
+# === Rails default ===
+/coverage/
+/public/assets/
+/public/packs/
+/node_modules/
+/yarn-error.log
+
