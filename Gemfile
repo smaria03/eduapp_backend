@@ -55,3 +55,5 @@ gem 'devise', '~> 4.9'
 gem 'devise-jwt'
 
 gem 'dotenv-rails', groups: %i[development test]
+
+gem 'ffi', '1.16.3'
