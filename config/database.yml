@@ -1,7 +1,15 @@
-test:
+default: &default
   adapter: postgresql
   encoding: unicode
-  database: eduapp_test
-  username: postgres
-  password: postgres
   host: localhost
+  username: postgres
+  password:
+  pool: 5
+
+development:
+  <<: *default
+  database: eduapp_backend_development
+
+test:
+  <<: *default
+  database: eduapp_beckend_test
