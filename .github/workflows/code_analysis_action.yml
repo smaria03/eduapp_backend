@@ -2,8 +2,12 @@ name: Code Analysis
 
 on:
   push:
-    branches: [ develop ]
+    branches:
+      - develop
+      - feature/login
   pull_request:
+    branches:
+      - develop
 
 jobs:
   linter:
@@ -32,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RAILS_ENV: test
+      DISABLE_SPRING: 1
     services:
       postgres:
         image: postgres
