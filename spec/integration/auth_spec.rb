@@ -14,7 +14,7 @@ RSpec.describe 'Authentication', type: :request do
           password: { type: :string },
           role: { type: :string }
         },
-        required: ['email', 'password', 'role']
+        required: %w[email password role]
       }
 
       response '200', 'successful login' do
