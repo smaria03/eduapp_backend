@@ -32,6 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RAILS_ENV: test
+      DISABLE_SPRING: 1
     services:
       postgres:
         image: postgres
