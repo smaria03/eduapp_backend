@@ -267,7 +267,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bootsnap (>= 1.4.4)
+  bootsnap (~> 1.13)
   byebug
   devise (~> 4.9)
   devise-jwt
