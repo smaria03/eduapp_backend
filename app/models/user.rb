@@ -10,5 +10,5 @@ class User < ApplicationRecord
          :jwt_authenticatable, jwt_revocation_strategy: self
 
   validates :role, presence: true, inclusion: { in: ROLES }
-  validates :email, presence: true, uniqueness: { scope: :role }
+  validates :email, presence: true
 end
