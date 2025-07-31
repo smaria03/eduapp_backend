@@ -9,5 +9,9 @@ Rails.application.routes.draw do
     post 'register', to: 'users#register'
     post 'login', to: 'users#login'
     get 'users/:id', to: 'users#show'
+
+    namespace :admin do
+      resources :users, only: [:create]
+    end
   end
 end

@@ -36,6 +36,7 @@ group :development, :test do
   gem 'rubocop', require: false
   gem 'rubocop-rails', require: false
   gem 'rubocop-gitlab-security', require: false
+  gem 'rswag'
   gem 'rswag-api'
   gem 'rswag-ui'
   gem 'rswag-specs'
