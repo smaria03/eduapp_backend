@@ -36,6 +36,7 @@ group :development, :test do
   gem 'rubocop', require: false
   gem 'rubocop-rails', require: false
   gem 'rubocop-gitlab-security', require: false
+  gem 'rswag'
   gem 'rswag-api'
   gem 'rswag-ui'
   gem 'rswag-specs'
@@ -57,3 +58,5 @@ gem 'devise-jwt'
 gem 'dotenv-rails', groups: %i[development test]
 
 gem 'ffi', '1.16.3'
+
+gem 'rainbow', '~> 3.1'

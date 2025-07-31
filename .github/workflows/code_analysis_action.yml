@@ -58,6 +58,7 @@ jobs:
         run: |
           gem install bundler -v 2.4.22
           bundle install --jobs 4 --retry 3
+          bundle update activesupport
 
       - name: Prepare environment
         run: |

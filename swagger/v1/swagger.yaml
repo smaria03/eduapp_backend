@@ -4,6 +4,85 @@ info:
   title: API V1
   version: v1
 paths:
+  "/api/admin/users":
+    post:
+      summary: Create a new user (admin only)
+      tags:
+      - - Admin Users
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: user created
+          content:
+            application/json:
+              examples:
+                created_user:
+                  value:
+                    message: User created successfully
+                    user:
+                      id: 6
+                      email: student3@example.com
+                      name: Prenume3 Nume3
+                      role: student
+                      created_at: '2025-07-31T10:59:25.431Z'
+                      updated_at: '2025-07-31T10:59:25.431Z'
+                      jti: 84767bee-957a-411c-bf31-25685ec0915c
+        '422':
+          description: invalid request
+          content:
+            application/json:
+              examples:
+                invalid_user:
+                  value:
+                    errors:
+                    - Email has already been taken
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error:
+                    - Unauthorized
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - user
+              properties:
+                user:
+                  type: object
+                  required:
+                  - email
+                  - password
+                  - password_confirmation
+                  - name
+                  - role
+                  properties:
+                    email:
+                      type: string
+                      example: student3@example.com
+                    password:
+                      type: string
+                      example: '123456'
+                    password_confirmation:
+                      type: string
+                      example: '123456'
+                    name:
+                      type: string
+                      example: Prenume3 Nume3
+                    role:
+                      type: string
+                      enum:
+                      - student
+                      - teacher
+                      example: student
+        required: true
   "/api/login":
     post:
       summary: User login
