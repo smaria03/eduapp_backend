@@ -54,15 +54,20 @@ jobs:
         with:
           ruby-version: '2.7.3'
 
-      - name: Bundle install
+      - name: Install dependencies
         run: |
           gem install bundler -v 2.4.22
           bundle install --jobs 4 --retry 3
 
+      - name: Prepare environment
+        run: |
+          rm -f tmp/pids/server.pid
+          bin/spring stop || true
+
       - name: Setup database
         run: |
           cp config/database.yml.github_actions config/database.yml
-          rails db:create db:schema:load
+          bundle exec rails db:create db:schema:load
 
       - name: Run tests
         run: bundle exec rspec
