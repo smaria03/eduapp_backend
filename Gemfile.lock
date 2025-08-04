@@ -289,6 +289,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activesupport (~> 6.1.4)
   bootsnap (>= 1.4.4)
   byebug
   devise (~> 4.9)
