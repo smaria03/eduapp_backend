@@ -12,7 +12,7 @@ module Api
     end
 
     def login
-      user = User.find_by('lower(email) = ? AND role = ?', params[:email].downcase, params[:role])
+      user = User.find_by('lower(email) = ?', params[:email].downcase)
 
       if user.blank? || !user.valid_password?(params[:password])
         render json: { errors: ['Invalid email/password combination'] }, status: :unauthorized

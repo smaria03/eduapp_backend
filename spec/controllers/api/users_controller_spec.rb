@@ -32,11 +32,5 @@ describe Api::UsersController, type: :controller do
 
       expect(response).to have_http_status(:unauthorized)
     end
-
-    it 'returns 401 for invalid role' do
-      post :login, params: { email: 'teacher@example.com', password: 'password123', role: 'admin' }
-
-      expect(response).to have_http_status(:unauthorized)
-    end
   end
 end
