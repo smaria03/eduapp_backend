@@ -1,18 +1,21 @@
 require 'rails_helper'
 
-describe Api::Admin::UsersController, type: :request do
-  before :each do
-    @admin = create(:user, name: 'Admin', email: 'admin@example.com', password: 'admin123',
-                           role: 'admin')
-    @teacher = create(:user, name: 'Teacher', email: 'teacher@example.com', password: 'teacher123',
-                             role: 'teacher')
+describe 'POST /api/admin/users', type: :request do
+  let!(:admin) { create(:user, :admin, password: 'admin123') }
+  let!(:teacher) { create(:user, :teacher, password: 'teacher123') }
 
-    post '/api/login', params: { email: @admin.email, password: 'admin123', role: 'admin' }
-    @admin_token = response.parsed_body['user']['token']
+  let(:admin_token) do
+    post '/api/login', params: { email: admin.email, password: 'admin123', role: 'admin' }
+    response.parsed_body['user']['token']
   end
 
-  describe 'POST /api/admin/users' do
-    it 'creates a student if the requester is an authenticated admin' do
+  let(:teacher_token) do
+    post '/api/login', params: { email: teacher.email, password: 'teacher123', role: 'teacher' }
+    response.parsed_body['user']['token']
+  end
+
+  describe 'when requester is admin' do
+    it 'creates a student if data is valid' do
       expect do
         post '/api/admin/users',
              params: {
@@ -24,7 +27,7 @@ describe Api::Admin::UsersController, type: :request do
                  role: 'student'
                }
              },
-             headers: { 'Authorization' => "Bearer #{@admin_token}" }
+             headers: { 'Authorization' => "Bearer #{admin_token}" }
       end.to change(User, :count).by(1)
 
       expect(response).to have_http_status(:created)
@@ -32,28 +35,7 @@ describe Api::Admin::UsersController, type: :request do
       expect(json['user']['email']).to eq('studentnew@example.com')
     end
 
-    it 'does not allow user creation if requester is not an admin' do
-      post '/api/login', params: { email: @teacher.email, password: 'teacher123', role: 'teacher' }
-      token = response.parsed_body['user']['token']
-
-      post '/api/admin/users',
-           params: {
-             user: {
-               name: 'Invalid',
-               email: 'unauth@example.com',
-               password: 'pass123',
-               password_confirmation: 'pass123',
-               role: 'student'
-             }
-           },
-           headers: { 'Authorization' => "Bearer #{token}" }
-
-      expect(response).to have_http_status(:unauthorized)
-      json = response.parsed_body
-      expect(json['error']).to eq('Unauthorized')
-    end
-
-    it 'returns validation errors when data is invalid' do
+    it 'returns validation errors if data is invalid' do
       post '/api/admin/users',
            params: {
              user: {
@@ -64,11 +46,31 @@ describe Api::Admin::UsersController, type: :request do
                role: ''
              }
            },
-           headers: { 'Authorization' => "Bearer #{@admin_token}" }
+           headers: { 'Authorization' => "Bearer #{admin_token}" }
 
       expect(response).to have_http_status(:unprocessable_entity)
       json = response.parsed_body
       expect(json['errors']).to be_present
+    end
+  end
+
+  describe 'when requester is NOT admin' do
+    it 'does not allow user creation' do
+      post '/api/admin/users',
+           params: {
+             user: {
+               name: 'Invalid',
+               email: 'unauth@example.com',
+               password: 'pass123',
+               password_confirmation: 'pass123',
+               role: 'student'
+             }
+           },
+           headers: { 'Authorization' => "Bearer #{teacher_token}" }
+
+      expect(response).to have_http_status(:unauthorized)
+      json = response.parsed_body
+      expect(json['error']).to eq('Unauthorized')
     end
   end
 end
