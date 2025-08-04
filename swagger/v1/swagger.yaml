@@ -3,6 +3,14 @@ openapi: 3.0.1
 info:
   title: API V1
   version: v1
+components:
+  securitySchemes:
+    bearer_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+- bearer_auth: []
 paths:
   "/api/admin/users":
     post:
@@ -15,10 +23,30 @@ paths:
       responses:
         '201':
           description: user created
+          content:
+            application/json:
+              example:
+                id: 123
+                email: student3@example.com
+                name: Prenume3 Nume3
+                role: student
         '422':
           description: invalid request
+          content:
+            application/json:
+              example:
+                errors:
+                - Email can't be blank
+                - Name can't be blank
+                - Password is too short
+                - Password confirmation doesn't match Password
+                - Role is not included in the list
         '401':
           description: unauthorized
+          content:
+            application/json:
+              example:
+                error: 'Access denied: admin only'
       requestBody:
         content:
           application/json:
@@ -60,12 +88,27 @@ paths:
       summary: User login
       tags:
       - Authentication
+      security: []
       parameters: []
       responses:
         '200':
           description: successful login
+          content:
+            application/json:
+              example:
+                user:
+                  id: 1
+                  name: Prenume1 Nume1
+                  email: teacher1@example.com
+                  role: teacher
+                  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         '401':
           description: unauthorized
+          content:
+            application/json:
+              example:
+                errors:
+                - Invalid email/password combination
       requestBody:
         content:
           application/json:
@@ -74,13 +117,18 @@ paths:
               properties:
                 email:
                   type: string
+                  description: User's email address
+                  example: teacher1@example.com
                 password:
                   type: string
+                  description: User's password
+                  example: '123456'
               required:
               - email
               - password
+        required: true
 servers:
-- url: https://{defaultHost}
+- url: http://{defaultHost}
   variables:
     defaultHost:
-      default: www.example.com
+      default: localhost:3000
