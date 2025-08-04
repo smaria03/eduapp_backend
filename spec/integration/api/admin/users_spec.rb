@@ -41,12 +41,18 @@ RSpec.describe 'api/admin/users', type: :request do
           }
         end
 
-        before do
-          allow_any_instance_of(Api::Admin::UsersController)
-            .to receive(:current_user).and_return(admin)
-          allow_any_instance_of(Api::Admin::UsersController)
-            .to receive(:authenticate_user!).and_return(true)
-        end
+        let(:Authorization) { "Bearer #{generate_token_for(admin)}" }
+
+        metadata[:response][:content] = {
+          'application/json' => {
+            example: {
+              id: 123,
+              email: 'student3@example.com',
+              name: 'Prenume3 Nume3',
+              role: 'student'
+            }
+          }
+        }
 
         run_test!
       end
@@ -66,12 +72,21 @@ RSpec.describe 'api/admin/users', type: :request do
           }
         end
 
-        before do
-          allow_any_instance_of(Api::Admin::UsersController)
-            .to receive(:current_user).and_return(admin)
-          allow_any_instance_of(Api::Admin::UsersController)
-            .to receive(:authenticate_user!).and_return(true)
-        end
+        let(:Authorization) { "Bearer #{generate_token_for(admin)}" }
+
+        metadata[:response][:content] = {
+          'application/json' => {
+            example: {
+              errors: [
+                "Email can't be blank",
+                "Name can't be blank",
+                'Password is too short',
+                "Password confirmation doesn't match Password",
+                'Role is not included in the list'
+              ]
+            }
+          }
+        }
 
         run_test!
       end
@@ -91,15 +106,22 @@ RSpec.describe 'api/admin/users', type: :request do
           }
         end
 
-        before do
-          allow_any_instance_of(Api::Admin::UsersController)
-            .to receive(:current_user).and_return(student)
-          allow_any_instance_of(Api::Admin::UsersController)
-            .to receive(:authenticate_user!).and_return(true)
-        end
+        let(:Authorization) { "Bearer #{generate_token_for(student)}" }
+
+        metadata[:response][:content] = {
+          'application/json' => {
+            example: {
+              error: 'Access denied: admin only'
+            }
+          }
+        }
 
         run_test!
       end
     end
   end
+end
+
+def generate_token_for(user)
+  Warden::JWTAuth::UserEncoder.new.call(user, :user, nil).first
 end
