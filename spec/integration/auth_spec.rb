@@ -11,10 +11,9 @@ RSpec.describe 'Authentication', type: :request do
         type: :object,
         properties: {
           email: { type: :string },
-          password: { type: :string },
-          role: { type: :string }
+          password: { type: :string }
         },
-        required: %w[email password role]
+        required: %w[email password]
       }
 
       response '200', 'successful login' do
@@ -30,8 +29,7 @@ RSpec.describe 'Authentication', type: :request do
         let(:credentials) do
           {
             email: 'teacher1@example.com',
-            password: '123456',
-            role: 'teacher'
+            password: '123456'
           }
         end
 
@@ -42,8 +40,7 @@ RSpec.describe 'Authentication', type: :request do
         let(:credentials) do
           {
             email: 'teacher1@example.com',
-            password: 'wrongpass',
-            role: 'teacher'
+            password: 'wrongpass'
           }
         end
 
