@@ -10,7 +10,7 @@
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
   config.jwt do |jwt|
-    jwt.secret = ENV.fetch('DEVISE_JWT_SECRET_KEY', nil)
+    jwt.secret = ENV['DEVISE_JWT_SECRET_KEY'] || 'test_secret_key'
     jwt.dispatch_requests = [
       ['POST', /^\/api\/login$/]
     ]
@@ -320,4 +320,10 @@ Devise.setup do |config|
   # When set to false, does not sign a user in automatically after their password is
   # changed. Defaults to true, so a user is signed in automatically after changing a password.
   # config.sign_in_after_change_password = true
+  #
+  config.navigational_formats = []
+
+  config.warden do |manager|
+    manager.failure_app = CustomFailure if defined?(CustomFailure)
+  end
 end

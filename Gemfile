@@ -6,7 +6,8 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '2.7.3'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails', branch: 'main'
-gem 'rails', '~> 6.1.4', '>= 6.1.4.6'
+gem 'rails', '6.1.7.5'
+gem 'concurrent-ruby', '< 1.3.5'
 # Use postgresql as the database for Active Record
 gem 'pg', '~> 1.1'
 # Use Puma as the app server
@@ -36,6 +37,7 @@ group :development, :test do
   gem 'rubocop', require: false
   gem 'rubocop-rails', require: false
   gem 'rubocop-gitlab-security', require: false
+  gem 'rswag'
   gem 'rswag-api'
   gem 'rswag-ui'
   gem 'rswag-specs'
@@ -57,3 +59,5 @@ gem 'devise-jwt'
 gem 'dotenv-rails', groups: %i[development test]
 
 gem 'ffi', '1.16.3'
+
+gem 'rainbow', '~> 3.1'

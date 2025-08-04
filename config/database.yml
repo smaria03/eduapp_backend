@@ -12,4 +12,4 @@ development:
 
 test:
   <<: *default
-  database: eduapp_beckend_test
+  database: eduapp_backend_test
