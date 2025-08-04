@@ -62,5 +62,4 @@ gem 'ffi', '1.16.3'
 
 gem 'rainbow', '~> 3.1'
 
-gem 'logger', '< 1.5.0', require: false
-
+gem 'logger', '< 1.4.0', require: false
