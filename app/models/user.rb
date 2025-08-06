@@ -11,4 +11,6 @@ class User < ApplicationRecord
 
   validates :role, presence: true, inclusion: { in: ROLES }
   validates :email, presence: true
+
+  belongs_to :school_class, optional: true
 end

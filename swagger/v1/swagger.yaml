@@ -12,6 +12,214 @@ components:
 security:
 - bearer_auth: []
 paths:
+  "/api/admin/school_classes":
+    post:
+      summary: Create a new school class
+      tags:
+      - - Admin SchoolClasses
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: school class created
+          content:
+            application/json:
+              example:
+                id: 1
+                name: 10A
+                students: []
+        '422':
+          description: invalid request
+          content:
+            application/json:
+              example:
+                errors:
+                - Name can't be blank
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - school_class
+              properties:
+                school_class:
+                  type: object
+                  required:
+                  - name
+                  - student_ids
+                  properties:
+                    name:
+                      type: string
+                      example: 10A
+                    student_ids:
+                      type: array
+                      items:
+                        type: integer
+                      example:
+                      - 1
+                      - 2
+                      - 3
+        required: true
+    get:
+      summary: List all school classes
+      tags:
+      - - Admin SchoolClasses
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: school classes listed
+          content:
+            application/json:
+              example:
+              - id: 1
+                name: 10A
+                students: []
+              - id: 2
+                name: 11B
+                students: []
+  "/api/admin/school_classes/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Show a specific school class
+      tags:
+      - - Admin SchoolClasses
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: school class found
+          content:
+            application/json:
+              example:
+                id: 1
+                name: 10A
+                students: []
+        '404':
+          description: not found
+          content:
+            application/json:
+              example:
+                error: School class not found
+    patch:
+      summary: Update a school class
+      tags:
+      - - Admin SchoolClasses
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: school class updated
+          content:
+            application/json:
+              example:
+                id: 1
+                name: 11B
+                students: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - school_class
+              properties:
+                school_class:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: 11B
+                    student_ids:
+                      type: array
+                      items:
+                        type: integer
+                      example:
+                      - 4
+                      - 5
+        required: true
+    delete:
+      summary: Delete a school class
+      tags:
+      - - Admin SchoolClasses
+      security:
+      - bearer_auth: []
+      responses:
+        '204':
+          description: school class deleted
+          content:
+            application/json:
+              example:
+  "/api/admin/school_classes/{id}/add_student/{student_id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    - name: student_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Add a student to a class
+      tags:
+      - - Admin SchoolClasses
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: student added to class
+          content:
+            application/json:
+              example:
+                message: Student added successfully
+        '404':
+          description: student not found
+          content:
+            application/json:
+              example:
+                error: Student not found
+  "/api/admin/school_classes/{id}/remove_student/{student_id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    - name: student_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    delete:
+      summary: Remove a student from a class
+      tags:
+      - - Admin SchoolClasses
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: student removed from class
+          content:
+            application/json:
+              example:
+                message: Student removed from class
+        '422':
+          description: student not in this class
+          content:
+            application/json:
+              example:
+                error: Student does not belong to this class
   "/api/admin/users":
     post:
       summary: Create a new user (admin only)
@@ -83,6 +291,29 @@ paths:
                       - teacher
                       example: student
         required: true
+  "/api/students":
+    get:
+      summary: Get list of all students
+      tags:
+      - - Users
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: students retrieved successfully
+          content:
+            application/json:
+              example:
+              - id: 1
+                name: Prenume1 Nume1
+                email: student1@example.com
+                role: student
+              - id: 2
+                name: Prenume2 Nume2
+                email: student2@example.com
+                role: student
+        '401':
+          description: unauthorized (no token)
   "/api/login":
     post:
       summary: User login

@@ -9,9 +9,16 @@ Rails.application.routes.draw do
     post 'register', to: 'users#register'
     post 'login', to: 'users#login'
     get 'users/:id', to: 'users#show'
+    get 'students', to: 'users#students'
 
     namespace :admin do
       resources :users, only: [:create]
+      resources :school_classes, only: %i[index create show update destroy] do
+        member do
+          delete 'remove_student/:student_id', to: 'school_classes#remove_student'
+          post 'add_student/:student_id', to: 'school_classes#add_student'
+        end
+      end
     end
   end
 end
