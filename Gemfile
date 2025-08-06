@@ -41,6 +41,7 @@ group :development, :test do
   gem 'rswag-api'
   gem 'rswag-ui'
   gem 'rswag-specs'
+  gem 'faker'
 end
 
 group :development do
