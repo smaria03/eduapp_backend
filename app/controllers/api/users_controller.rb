@@ -2,6 +2,8 @@
 
 module Api
   class UsersController < ApplicationController
+    before_action :authenticate_user!, only: [:students]
+
     def register
       user = User.new(user_params)
       if user.save
@@ -39,6 +41,10 @@ module Api
       else
         render json: { error: 'User not found' }, status: :not_found
       end
+    end
+
+    def students
+      render json: User.where(role: 'student')
     end
 
     private
