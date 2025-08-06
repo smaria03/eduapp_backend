@@ -96,7 +96,7 @@ RSpec.describe 'api/admin/subjects', type: :request do
       security [bearer_auth: []]
 
       response '200', 'subjects listed' do
-        let!(:_subjects) { create_list(:subject, 2, name: 'Math') }
+        let!(:_subjects) { create_list(:subject, 2) }
 
         schema type: :array, items: {
           type: :object,
