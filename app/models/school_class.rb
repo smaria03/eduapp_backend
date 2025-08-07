@@ -1,5 +1,7 @@
 class SchoolClass < ApplicationRecord
   has_many :students, class_name: 'User', dependent: :nullify
+  has_many :school_class_subjects, dependent: :destroy
+  has_many :subjects, through: :school_class_subjects
 
   validates :name, presence: true, uniqueness: true
 
