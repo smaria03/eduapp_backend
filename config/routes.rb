@@ -10,6 +10,11 @@ Rails.application.routes.draw do
     post 'login', to: 'users#login'
     get 'users/:id', to: 'users#show'
     get 'students', to: 'users#students'
+    get 'school_classes/:school_class_id/subjects', to: 'school_class_subjects#index_for_class'
+    get 'subjects/:subject_id/school_classes', to: 'school_class_subjects#index_for_subject'
+    post 'school_classes/:school_class_id/subjects/:subject_id', to: 'school_class_subjects#add'
+    delete 'school_classes/:school_class_id/subjects/:subject_id',
+           to: 'school_class_subjects#remove'
 
     namespace :admin do
       resources :users, only: [:create]

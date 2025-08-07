@@ -404,6 +404,142 @@ paths:
                       - teacher
                       example: student
         required: true
+  "/api/school_classes/{school_class_id}/subjects/{subject_id}":
+    parameters:
+    - name: school_class_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    - name: subject_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Assign a subject to a school class (admin only)
+      tags:
+      - - SchoolClassSubjects
+      security:
+      - bearer_auth: []
+      responses:
+        '201':
+          description: Subject added to class successfully
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    message: Subject added to class successfully
+        '422':
+          description: Subject already assigned to class
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    message: Subject already assigned to class
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: You need to sign in or sign up before continuing.
+    delete:
+      summary: Remove a subject from a school class (admin only)
+      tags:
+      - - SchoolClassSubjects
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Subject removed from class successfully
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    message: Subject removed from class successfully
+        '404':
+          description: Subject not assigned to this class
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    message: Subject not assigned to this class
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: You need to sign in or sign up before continuing.
+  "/api/school_classes/{school_class_id}/subjects":
+    parameters:
+    - name: school_class_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: List all subjects for a school class (authenticated users)
+      tags:
+      - - SchoolClassSubjects
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Subjects retrieved
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                  - id: 1
+                    name: Math
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: You need to sign in or sign up before continuing.
+  "/api/subjects/{subject_id}/school_classes":
+    parameters:
+    - name: subject_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: List all school classes for a subject (authenticated users)
+      tags:
+      - - SchoolClassSubjects
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: School classes retrieved
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                  - id: 1
+                    name: 11B
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: You need to sign in or sign up before continuing.
   "/api/students":
     get:
       summary: Get list of all students
