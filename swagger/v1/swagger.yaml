@@ -220,6 +220,119 @@ paths:
             application/json:
               example:
                 error: Student does not belong to this class
+  "/api/admin/subjects":
+    post:
+      summary: Create a new subject (admin only)
+      tags:
+      - - Admin Subjects
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: subject created
+          content:
+            application/json:
+              example:
+                id: 1
+                name: Mathematics
+        '422':
+          description: invalid request
+          content:
+            application/json:
+              example:
+                errors:
+                - Name can't be blank
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              example:
+                error: Access denied
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - subject
+              properties:
+                subject:
+                  type: object
+                  required:
+                  - name
+                  properties:
+                    name:
+                      type: string
+                      example: Mathematics
+        required: true
+    get:
+      summary: List all subjects (admin only)
+      tags:
+      - - Admin Subjects
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: subjects listed
+          content:
+            application/json:
+              example:
+              - id: 1
+                name: Math
+              - id: 2
+                name: Geography
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                  required:
+                  - id
+                  - name
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              example:
+                error: Access denied
+  "/api/admin/subjects/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      description: Subject ID
+      schema:
+        type: string
+    delete:
+      summary: Delete a subject (admin only)
+      tags:
+      - - Admin Subjects
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: subject deleted
+          content:
+            application/json:
+              example:
+                message: Subject deleted successfully
+        '404':
+          description: subject not found
+          content:
+            application/json:
+              example:
+                error: Subject not found
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              example:
+                error: Access denied
   "/api/admin/users":
     post:
       summary: Create a new user (admin only)

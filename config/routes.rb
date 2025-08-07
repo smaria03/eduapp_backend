@@ -19,6 +19,7 @@ Rails.application.routes.draw do
           post 'add_student/:student_id', to: 'school_classes#add_student'
         end
       end
+      resources :subjects, only: %i[index create destroy]
     end
   end
 end
