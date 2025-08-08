@@ -12,398 +12,6 @@ components:
 security:
 - bearer_auth: []
 paths:
-  "/api/admin/school_classes":
-    post:
-      summary: Create a new school class
-      tags:
-      - - Admin SchoolClasses
-      security:
-      - bearer_auth: []
-      parameters: []
-      responses:
-        '201':
-          description: school class created
-          content:
-            application/json:
-              example:
-                id: 1
-                name: 10A
-                students: []
-        '422':
-          description: invalid request
-          content:
-            application/json:
-              example:
-                errors:
-                - Name can't be blank
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-              - school_class
-              properties:
-                school_class:
-                  type: object
-                  required:
-                  - name
-                  - student_ids
-                  properties:
-                    name:
-                      type: string
-                      example: 10A
-                    student_ids:
-                      type: array
-                      items:
-                        type: integer
-                      example:
-                      - 1
-                      - 2
-                      - 3
-        required: true
-    get:
-      summary: List all school classes
-      tags:
-      - - Admin SchoolClasses
-      security:
-      - bearer_auth: []
-      responses:
-        '200':
-          description: school classes listed
-          content:
-            application/json:
-              example:
-              - id: 1
-                name: 10A
-                students: []
-              - id: 2
-                name: 11B
-                students: []
-  "/api/admin/school_classes/{id}":
-    parameters:
-    - name: id
-      in: path
-      required: true
-      schema:
-        type: integer
-    get:
-      summary: Show a specific school class
-      tags:
-      - - Admin SchoolClasses
-      security:
-      - bearer_auth: []
-      responses:
-        '200':
-          description: school class found
-          content:
-            application/json:
-              example:
-                id: 1
-                name: 10A
-                students: []
-        '404':
-          description: not found
-          content:
-            application/json:
-              example:
-                error: School class not found
-    patch:
-      summary: Update a school class
-      tags:
-      - - Admin SchoolClasses
-      security:
-      - bearer_auth: []
-      parameters: []
-      responses:
-        '200':
-          description: school class updated
-          content:
-            application/json:
-              example:
-                id: 1
-                name: 11B
-                students: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-              - school_class
-              properties:
-                school_class:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                      example: 11B
-                    student_ids:
-                      type: array
-                      items:
-                        type: integer
-                      example:
-                      - 4
-                      - 5
-        required: true
-    delete:
-      summary: Delete a school class
-      tags:
-      - - Admin SchoolClasses
-      security:
-      - bearer_auth: []
-      responses:
-        '204':
-          description: school class deleted
-          content:
-            application/json:
-              example:
-  "/api/admin/school_classes/{id}/add_student/{student_id}":
-    parameters:
-    - name: id
-      in: path
-      required: true
-      schema:
-        type: integer
-    - name: student_id
-      in: path
-      required: true
-      schema:
-        type: integer
-    post:
-      summary: Add a student to a class
-      tags:
-      - - Admin SchoolClasses
-      security:
-      - bearer_auth: []
-      responses:
-        '200':
-          description: student added to class
-          content:
-            application/json:
-              example:
-                message: Student added successfully
-        '404':
-          description: student not found
-          content:
-            application/json:
-              example:
-                error: Student not found
-  "/api/admin/school_classes/{id}/remove_student/{student_id}":
-    parameters:
-    - name: id
-      in: path
-      required: true
-      schema:
-        type: integer
-    - name: student_id
-      in: path
-      required: true
-      schema:
-        type: integer
-    delete:
-      summary: Remove a student from a class
-      tags:
-      - - Admin SchoolClasses
-      security:
-      - bearer_auth: []
-      responses:
-        '200':
-          description: student removed from class
-          content:
-            application/json:
-              example:
-                message: Student removed from class
-        '422':
-          description: student not in this class
-          content:
-            application/json:
-              example:
-                error: Student does not belong to this class
-  "/api/admin/subjects":
-    post:
-      summary: Create a new subject (admin only)
-      tags:
-      - - Admin Subjects
-      security:
-      - bearer_auth: []
-      parameters: []
-      responses:
-        '201':
-          description: subject created
-          content:
-            application/json:
-              example:
-                id: 1
-                name: Mathematics
-        '422':
-          description: invalid request
-          content:
-            application/json:
-              example:
-                errors:
-                - Name can't be blank
-        '401':
-          description: unauthorized
-          content:
-            application/json:
-              example:
-                error: Access denied
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-              - subject
-              properties:
-                subject:
-                  type: object
-                  required:
-                  - name
-                  properties:
-                    name:
-                      type: string
-                      example: Mathematics
-        required: true
-    get:
-      summary: List all subjects (admin only)
-      tags:
-      - - Admin Subjects
-      security:
-      - bearer_auth: []
-      responses:
-        '200':
-          description: subjects listed
-          content:
-            application/json:
-              example:
-              - id: 1
-                name: Math
-              - id: 2
-                name: Geography
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                    name:
-                      type: string
-                  required:
-                  - id
-                  - name
-        '401':
-          description: unauthorized
-          content:
-            application/json:
-              example:
-                error: Access denied
-  "/api/admin/subjects/{id}":
-    parameters:
-    - name: id
-      in: path
-      required: true
-      description: Subject ID
-      schema:
-        type: string
-    delete:
-      summary: Delete a subject (admin only)
-      tags:
-      - - Admin Subjects
-      security:
-      - bearer_auth: []
-      responses:
-        '200':
-          description: subject deleted
-          content:
-            application/json:
-              example:
-                message: Subject deleted successfully
-        '404':
-          description: subject not found
-          content:
-            application/json:
-              example:
-                error: Subject not found
-        '401':
-          description: unauthorized
-          content:
-            application/json:
-              example:
-                error: Access denied
-  "/api/admin/users":
-    post:
-      summary: Create a new user (admin only)
-      tags:
-      - - Admin Users
-      security:
-      - bearer_auth: []
-      parameters: []
-      responses:
-        '201':
-          description: user created
-          content:
-            application/json:
-              example:
-                id: 123
-                email: student3@example.com
-                name: Prenume3 Nume3
-                role: student
-        '422':
-          description: invalid request
-          content:
-            application/json:
-              example:
-                errors:
-                - Email can't be blank
-                - Name can't be blank
-                - Password is too short
-                - Password confirmation doesn't match Password
-                - Role is not included in the list
-        '401':
-          description: unauthorized
-          content:
-            application/json:
-              example:
-                error: 'Access denied: admin only'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-              - user
-              properties:
-                user:
-                  type: object
-                  required:
-                  - email
-                  - password
-                  - password_confirmation
-                  - name
-                  - role
-                  properties:
-                    email:
-                      type: string
-                      example: student3@example.com
-                    password:
-                      type: string
-                      example: '123456'
-                    password_confirmation:
-                      type: string
-                      example: '123456'
-                    name:
-                      type: string
-                      example: Prenume3 Nume3
-                    role:
-                      type: string
-                      enum:
-                      - student
-                      - teacher
-                      example: student
-        required: true
   "/api/school_classes/{school_class_id}/subjects/{subject_id}":
     parameters:
     - name: school_class_id
@@ -540,6 +148,214 @@ paths:
                 example:
                   value:
                     error: You need to sign in or sign up before continuing.
+  "/api/school_classes":
+    post:
+      summary: Create a new school class (admin only)
+      tags:
+      - - SchoolClasses
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: school class created
+          content:
+            application/json:
+              example:
+                id: 1
+                name: 10A
+                students: []
+        '422':
+          description: invalid request
+          content:
+            application/json:
+              example:
+                errors:
+                - Name can't be blank
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - school_class
+              properties:
+                school_class:
+                  type: object
+                  required:
+                  - name
+                  - student_ids
+                  properties:
+                    name:
+                      type: string
+                      example: 10A
+                    student_ids:
+                      type: array
+                      items:
+                        type: integer
+                      example:
+                      - 1
+                      - 2
+                      - 3
+        required: true
+    get:
+      summary: List all school classes
+      tags:
+      - - SchoolClasses
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: school classes listed
+          content:
+            application/json:
+              example:
+              - id: 1
+                name: 10A
+                students: []
+              - id: 2
+                name: 11B
+                students: []
+  "/api/school_classes/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Show a specific school class
+      tags:
+      - - SchoolClasses
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: school class found
+          content:
+            application/json:
+              example:
+                id: 1
+                name: 10A
+                students: []
+        '404':
+          description: not found
+          content:
+            application/json:
+              example:
+                error: School class not found
+    patch:
+      summary: Update a school class (admin only)
+      tags:
+      - - SchoolClasses
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: school class updated
+          content:
+            application/json:
+              example:
+                id: 1
+                name: 11B
+                students: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - school_class
+              properties:
+                school_class:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: 11B
+                    student_ids:
+                      type: array
+                      items:
+                        type: integer
+                      example:
+                      - 4
+                      - 5
+        required: true
+    delete:
+      summary: Delete a school class (admin only)
+      tags:
+      - - SchoolClasses
+      security:
+      - bearer_auth: []
+      responses:
+        '204':
+          description: school class deleted
+          content:
+            application/json:
+              example:
+  "/api/school_classes/{id}/add_student/{student_id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    - name: student_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Add a student to a class (admin only)
+      tags:
+      - - SchoolClasses
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: student added to class
+          content:
+            application/json:
+              example:
+                message: Student added successfully
+        '404':
+          description: student not found
+          content:
+            application/json:
+              example:
+                error: Student not found
+  "/api/school_classes/{id}/remove_student/{student_id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    - name: student_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    delete:
+      summary: Remove a student from a class (admin only)
+      tags:
+      - - SchoolClasses
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: student removed from class
+          content:
+            application/json:
+              example:
+                message: Student removed from class
+        '422':
+          description: student not in this class
+          content:
+            application/json:
+              example:
+                error: Student does not belong to this class
   "/api/students":
     get:
       summary: Get list of all students
@@ -563,6 +379,184 @@ paths:
                 role: student
         '401':
           description: unauthorized (no token)
+  "/api/subjects":
+    post:
+      summary: Create a new subject (admin only)
+      tags:
+      - - Subjects
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: subject created
+          content:
+            application/json:
+              example:
+                id: 1
+                name: Mathematics
+        '422':
+          description: invalid request
+          content:
+            application/json:
+              example:
+                errors:
+                - Name can't be blank
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              example:
+                error: Access denied
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - subject
+              properties:
+                subject:
+                  type: object
+                  required:
+                  - name
+                  properties:
+                    name:
+                      type: string
+                      example: Mathematics
+        required: true
+    get:
+      summary: List all subjects
+      tags:
+      - - Subjects
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: subjects listed
+          content:
+            application/json:
+              example:
+              - id: 1
+                name: Math
+              - id: 2
+                name: Geography
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                  required:
+                  - id
+                  - name
+  "/api/subjects/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      description: Subject ID
+      schema:
+        type: string
+    delete:
+      summary: Delete a subject (admin only)
+      tags:
+      - - Subjects
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: subject deleted
+          content:
+            application/json:
+              example:
+                message: Subject deleted successfully
+        '404':
+          description: subject not found
+          content:
+            application/json:
+              example:
+                error: Subject not found
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              example:
+                error: Access denied
+  "/api/users":
+    post:
+      summary: Create a new user (admin only)
+      tags:
+      - - Users
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: user created
+          content:
+            application/json:
+              example:
+                id: 123
+                email: student3@example.com
+                name: Prenume3 Nume3
+                role: student
+        '422':
+          description: invalid request
+          content:
+            application/json:
+              example:
+                errors:
+                - Email can't be blank
+                - Name can't be blank
+                - Password is too short
+                - Password confirmation doesn't match Password
+                - Role is not included in the list
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              example:
+                error: 'Access denied: admin only'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - user
+              properties:
+                user:
+                  type: object
+                  required:
+                  - email
+                  - password
+                  - password_confirmation
+                  - name
+                  - role
+                  properties:
+                    email:
+                      type: string
+                      example: student3@example.com
+                    password:
+                      type: string
+                      example: '123456'
+                    password_confirmation:
+                      type: string
+                      example: '123456'
+                    name:
+                      type: string
+                      example: Prenume3 Nume3
+                    role:
+                      type: string
+                      enum:
+                      - student
+                      - teacher
+                      example: student
+        required: true
   "/api/login":
     post:
       summary: User login

@@ -1,12 +1,12 @@
 require 'swagger_helper'
 
-RSpec.describe 'api/admin/subjects', type: :request do
+RSpec.describe 'api/subjects', type: :request do
   let(:admin) { create(:user, role: 'admin') }
   let(:Authorization) { "Bearer #{generate_token_for(admin)}" }
 
-  path '/api/admin/subjects' do
+  path '/api/subjects' do
     post 'Create a new subject (admin only)' do
-      tags ['Admin Subjects']
+      tags ['Subjects']
       consumes 'application/json'
       produces 'application/json'
       security [bearer_auth: []]
@@ -90,8 +90,8 @@ RSpec.describe 'api/admin/subjects', type: :request do
       end
     end
 
-    get 'List all subjects (admin only)' do
-      tags ['Admin Subjects']
+    get 'List all subjects' do
+      tags ['Subjects']
       produces 'application/json'
       security [bearer_auth: []]
 
@@ -118,29 +118,14 @@ RSpec.describe 'api/admin/subjects', type: :request do
 
         run_test!
       end
-
-      response '401', 'unauthorized' do
-        let(:student) { create(:user, role: 'student') }
-        let(:Authorization) { "Bearer #{generate_token_for(student)}" }
-
-        metadata[:response][:content] = {
-          'application/json' => {
-            example: {
-              error: 'Access denied'
-            }
-          }
-        }
-
-        run_test!
-      end
     end
   end
 
-  path '/api/admin/subjects/{id}' do
+  path '/api/subjects/{id}' do
     parameter name: :id, in: :path, type: :string, required: true, description: 'Subject ID'
 
     delete 'Delete a subject (admin only)' do
-      tags ['Admin Subjects']
+      tags ['Subjects']
       produces 'application/json'
       security [bearer_auth: []]
 

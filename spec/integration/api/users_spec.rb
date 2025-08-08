@@ -1,9 +1,9 @@
 require 'swagger_helper'
 
-RSpec.describe 'api/admin/users', type: :request do
-  path '/api/admin/users' do
+RSpec.describe 'api/users', type: :request do
+  path '/api/users' do
     post 'Create a new user (admin only)' do
-      tags ['Admin Users']
+      tags ['Users']
       consumes 'application/json'
       produces 'application/json'
       security [bearer_auth: []]
