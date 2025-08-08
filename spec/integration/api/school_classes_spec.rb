@@ -1,12 +1,12 @@
 require 'swagger_helper'
 
-RSpec.describe 'api/admin/school_classes', type: :request do
+RSpec.describe 'api/school_classes', type: :request do
   let(:admin) { create(:user, :admin) }
   let(:Authorization) { "Bearer #{generate_token_for(admin)}" }
 
-  path '/api/admin/school_classes' do
-    post 'Create a new school class' do
-      tags ['Admin SchoolClasses']
+  path '/api/school_classes' do
+    post 'Create a new school class (admin only)' do
+      tags ['SchoolClasses']
       consumes 'application/json'
       produces 'application/json'
       security [bearer_auth: []]
@@ -76,7 +76,7 @@ RSpec.describe 'api/admin/school_classes', type: :request do
     end
 
     get 'List all school classes' do
-      tags ['Admin SchoolClasses']
+      tags ['SchoolClasses']
       produces 'application/json'
       security [bearer_auth: []]
 
@@ -95,11 +95,11 @@ RSpec.describe 'api/admin/school_classes', type: :request do
     end
   end
 
-  path '/api/admin/school_classes/{id}' do
+  path '/api/school_classes/{id}' do
     parameter name: :id, in: :path, type: :integer
 
     get 'Show a specific school class' do
-      tags ['Admin SchoolClasses']
+      tags ['SchoolClasses']
       produces 'application/json'
       security [bearer_auth: []]
 
@@ -134,8 +134,8 @@ RSpec.describe 'api/admin/school_classes', type: :request do
       end
     end
 
-    patch 'Update a school class' do
-      tags ['Admin SchoolClasses']
+    patch 'Update a school class (admin only)' do
+      tags ['SchoolClasses']
       consumes 'application/json'
       produces 'application/json'
       security [bearer_auth: []]
@@ -176,8 +176,8 @@ RSpec.describe 'api/admin/school_classes', type: :request do
       end
     end
 
-    delete 'Delete a school class' do
-      tags ['Admin SchoolClasses']
+    delete 'Delete a school class (admin only)' do
+      tags ['SchoolClasses']
       produces 'application/json'
       security [bearer_auth: []]
 
@@ -195,12 +195,12 @@ RSpec.describe 'api/admin/school_classes', type: :request do
     end
   end
 
-  path '/api/admin/school_classes/{id}/add_student/{student_id}' do
+  path '/api/school_classes/{id}/add_student/{student_id}' do
     parameter name: :id, in: :path, type: :integer
     parameter name: :student_id, in: :path, type: :integer
 
-    post 'Add a student to a class' do
-      tags ['Admin SchoolClasses']
+    post 'Add a student to a class (admin only)' do
+      tags ['SchoolClasses']
       produces 'application/json'
       security [bearer_auth: []]
 
@@ -236,12 +236,12 @@ RSpec.describe 'api/admin/school_classes', type: :request do
     end
   end
 
-  path '/api/admin/school_classes/{id}/remove_student/{student_id}' do
+  path '/api/school_classes/{id}/remove_student/{student_id}' do
     parameter name: :id, in: :path, type: :integer
     parameter name: :student_id, in: :path, type: :integer
 
-    delete 'Remove a student from a class' do
-      tags ['Admin SchoolClasses']
+    delete 'Remove a student from a class (admin only)' do
+      tags ['SchoolClasses']
       produces 'application/json'
       security [bearer_auth: []]
 

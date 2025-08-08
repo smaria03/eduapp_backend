@@ -11,10 +11,10 @@ describe 'Admin::SchoolClasses API', type: :request do
     @admin_token = response.parsed_body['user']['token']
   end
 
-  describe 'POST /api/admin/school_classes' do
+  describe 'POST /api/school_classes' do
     it 'creates a class with valid students' do
       expect do
-        post '/api/admin/school_classes',
+        post '/api/school_classes',
              headers: { 'Authorization' => "Bearer #{@admin_token}" },
              params: {
                school_class: {
@@ -30,7 +30,7 @@ describe 'Admin::SchoolClasses API', type: :request do
 
     it 'fails if class name is duplicate' do
       create(:school_class, name: '10A')
-      post '/api/admin/school_classes',
+      post '/api/school_classes',
            headers: { 'Authorization' => "Bearer #{@admin_token}" },
            params: { school_class: { name: '10A', student_ids: [] }}
 
@@ -41,7 +41,7 @@ describe 'Admin::SchoolClasses API', type: :request do
       existing_class = create(:school_class, name: '9C')
       student1.update(school_class: existing_class)
 
-      post '/api/admin/school_classes',
+      post '/api/school_classes',
            headers: { 'Authorization' => "Bearer #{@admin_token}" },
            params: { school_class: { name: '11B', student_ids: [student1.id] }}
 
@@ -50,11 +50,11 @@ describe 'Admin::SchoolClasses API', type: :request do
     end
   end
 
-  describe 'PATCH /api/admin/school_classes/:id' do
+  describe 'PATCH /api/school_classes/:id' do
     let!(:school_class) { create(:school_class, name: '10A') }
 
     it 'updates name and student list' do
-      patch "/api/admin/school_classes/#{school_class.id}",
+      patch "/api/school_classes/#{school_class.id}",
             headers: { 'Authorization' => "Bearer #{@admin_token}" },
             params: { school_class: { name: '10B', student_ids: [student3.id] }}
 
@@ -64,11 +64,11 @@ describe 'Admin::SchoolClasses API', type: :request do
     end
   end
 
-  describe 'POST /api/admin/school_classes/:id/add_student/:student_id' do
+  describe 'POST /api/school_classes/:id/add_student/:student_id' do
     let!(:school_class) { create(:school_class, name: '12A') }
 
     it 'adds a new student to class' do
-      post "/api/admin/school_classes/#{school_class.id}/add_student/#{student1.id}",
+      post "/api/school_classes/#{school_class.id}/add_student/#{student1.id}",
            headers: { 'Authorization' => "Bearer #{@admin_token}" }
 
       expect(response).to have_http_status(:ok)
@@ -79,20 +79,20 @@ describe 'Admin::SchoolClasses API', type: :request do
       other_class = create(:school_class, name: '8B')
       student2.update(school_class: other_class)
 
-      post "/api/admin/school_classes/#{school_class.id}/add_student/#{student2.id}",
+      post "/api/school_classes/#{school_class.id}/add_student/#{student2.id}",
            headers: { 'Authorization' => "Bearer #{@admin_token}" }
 
       expect(response).to have_http_status(:unprocessable_entity)
     end
   end
 
-  describe 'DELETE /api/admin/school_classes/:id/remove_student/:student_id' do
+  describe 'DELETE /api/school_classes/:id/remove_student/:student_id' do
     let!(:school_class) { create(:school_class, name: '5A') }
 
     before { student3.update(school_class: school_class) }
 
     it 'removes a student from the class' do
-      delete "/api/admin/school_classes/#{school_class.id}/remove_student/#{student3.id}",
+      delete "/api/school_classes/#{school_class.id}/remove_student/#{student3.id}",
              headers: { 'Authorization' => "Bearer #{@admin_token}" }
 
       expect(response).to have_http_status(:ok)
@@ -100,12 +100,12 @@ describe 'Admin::SchoolClasses API', type: :request do
     end
   end
 
-  describe 'DELETE /api/admin/school_classes/:id' do
+  describe 'DELETE /api/school_classes/:id' do
     let!(:school_class) { create(:school_class, name: '11A') }
 
     it 'deletes the class successfully' do
       expect do
-        delete "/api/admin/school_classes/#{school_class.id}",
+        delete "/api/school_classes/#{school_class.id}",
                headers: { 'Authorization' => "Bearer #{@admin_token}" }
       end.to change(SchoolClass, :count).by(-1)
 

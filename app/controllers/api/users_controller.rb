@@ -2,12 +2,23 @@
 
 module Api
   class UsersController < ApplicationController
-    before_action :authenticate_user!, only: [:students]
+    before_action :authenticate_user!, only: %i[students show create]
+    before_action :authorize_admin!, only: [:create]
+    def show
+      user = User.find_by(id: params[:id])
 
-    def register
+      if user
+        render json: { id: user.id, name: user.name, role: user.role }
+      else
+        render json: { error: 'User not found' }, status: :not_found
+      end
+    end
+
+    def create
       user = User.new(user_params)
+
       if user.save
-        render json: { message: 'User registered successfully' }, status: :created
+        render json: { message: 'User created successfully', user: user }, status: :created
       else
         render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
       end
@@ -33,16 +44,6 @@ module Api
       }
     end
 
-    def show
-      user = User.find_by(id: params[:id])
-
-      if user
-        render json: { id: user.id, name: user.name, role: user.role }
-      else
-        render json: { error: 'User not found' }, status: :not_found
-      end
-    end
-
     def students
       render json: User.where(role: 'student')
     end
@@ -51,6 +52,12 @@ module Api
 
     def user_params
       params.require(:user).permit(:email, :password, :password_confirmation, :name, :role)
+    end
+
+    def authorize_admin!
+      return if current_user&.role == 'admin'
+
+      render json: { error: 'Unauthorized: Admins only' }, status: :unauthorized
     end
   end
 end
