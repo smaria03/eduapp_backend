@@ -195,6 +195,79 @@ RSpec.describe 'api/school_class_subjects', type: :request do
       end
     end
   end
+
+  path '/api/school_class_subjects/{id}' do
+    parameter name: :id, in: :path, type: :integer
+
+    patch 'Assign the teacher for a class-subject (admin only)' do
+      tags ['SchoolClassSubjects']
+      consumes 'application/json'
+      produces 'application/json'
+      security [bearer_auth: []]
+
+      parameter name: :payload, in: :body, schema: {
+        type: :object,
+        properties: { teacher_id: { type: :integer }},
+        required: ['teacher_id']
+      }
+
+      response '200', 'Teacher updated successfully' do
+        let(:Authorization) { "Bearer #{generate_token_for(admin)}" }
+        let(:school_class) { create(:school_class) }
+        let(:subject) { create(:subject) }
+        let(:assignment) do
+          SchoolClassSubject.create!(school_class: school_class, subject: subject)
+        end
+        let(:id) { assignment.id }
+        let(:teacher) { create(:user, :teacher) }
+        let(:payload) { { teacher_id: teacher.id } }
+
+        example 'application/json', :example, { message: 'Teacher updated successfully' }
+        run_test!
+      end
+
+      response '422', 'Provided user is not a teacher' do
+        let(:Authorization) { "Bearer #{generate_token_for(admin)}" }
+        let(:school_class) { create(:school_class) }
+        let(:subject) { create(:subject) }
+        let(:assignment) do
+          SchoolClassSubject.create!(school_class: school_class, subject: subject)
+        end
+        let(:id) { assignment.id }
+        let(:not_teacher) { create(:user, :student) }
+        let(:payload) { { teacher_id: not_teacher.id } }
+
+        example 'application/json', :example, { error: 'Provided user is not a teacher' }
+        run_test!
+      end
+
+      response '401', 'Unauthorized' do
+        let(:Authorization) { "Bearer #{generate_token_for(user)}" }
+        let(:school_class) { create(:school_class) }
+        let(:subject) { create(:subject) }
+        let(:assignment) do
+          SchoolClassSubject.create!(school_class: school_class, subject: subject)
+        end
+        let(:id) { assignment.id }
+        let(:teacher) { create(:user, :teacher) }
+        let(:payload) { { teacher_id: teacher.id } }
+
+        example 'application/json', :example, { error: 'Unauthorized: Admins only' }
+        run_test!
+      end
+
+      response '401', 'Unauthenticated' do
+        let(:Authorization) { nil }
+        let(:id) { 1 }
+        let(:payload) { { teacher_id: 1 } }
+
+        example 'application/json', :example, {
+          error: 'You need to sign in or sign up before continuing.'
+        }
+        run_test!
+      end
+    end
+  end
 end
 
 def generate_token_for(user)

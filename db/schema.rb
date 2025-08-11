@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_08_07_083454) do
+ActiveRecord::Schema.define(version: 2025_08_11_064047) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -20,9 +20,12 @@ ActiveRecord::Schema.define(version: 2025_08_07_083454) do
     t.bigint "subject_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "teacher_id"
+    t.index ["school_class_id", "subject_id"], name: "idx_unique_class_subject", unique: true
     t.index ["school_class_id", "subject_id"], name: "index_unique_class_subject", unique: true
     t.index ["school_class_id"], name: "index_school_class_subjects_on_school_class_id"
     t.index ["subject_id"], name: "index_school_class_subjects_on_subject_id"
+    t.index ["teacher_id"], name: "index_school_class_subjects_on_teacher_id"
   end
 
   create_table "school_classes", force: :cascade do |t|
@@ -59,5 +62,6 @@ ActiveRecord::Schema.define(version: 2025_08_07_083454) do
 
   add_foreign_key "school_class_subjects", "school_classes"
   add_foreign_key "school_class_subjects", "subjects"
+  add_foreign_key "school_class_subjects", "users", column: "teacher_id"
   add_foreign_key "users", "school_classes"
 end

@@ -1,12 +1,21 @@
 module Api
   class SchoolClassSubjectsController < ApplicationController
+    before_action :authenticate_user!
+    before_action :authorize_admin!, only: %i[add remove update]
     before_action :set_school_class, only: %i[index_for_class add remove]
     before_action :set_subject, only: %i[index_for_subject add remove]
-    before_action :authenticate_user!
-    before_action :authorize_admin!, only: %i[add remove]
+    before_action :set_assignment, only: %i[update]
 
     def index_for_class
-      render json: @school_class.subjects.select(:id, :name)
+      scs = @school_class.school_class_subjects.includes(:subject, :teacher)
+      render json: scs.map { |row|
+        {
+          id: row.subject.id,
+          name: row.subject.name,
+          assignment_id: row.id,
+          teacher: row.teacher ? { id: row.teacher.id, name: row.teacher.name } : nil
+        }
+      }
     end
 
     def index_for_subject
@@ -32,6 +41,19 @@ module Api
       end
     end
 
+    def update
+      teacher_id = params.require(:teacher_id)
+
+      user = User.find_by(id: teacher_id)
+      unless user&.role == 'teacher'
+        render json: { error: 'Provided user is not a teacher' },
+               status: :unprocessable_entity and return
+      end
+
+      @assignment.update!(teacher: user)
+      render json: { message: 'Teacher updated successfully' }, status: :ok
+    end
+
     private
 
     def set_school_class
@@ -40,6 +62,10 @@ module Api
 
     def set_subject
       @subject = Subject.find(params[:subject_id])
+    end
+
+    def set_assignment
+      @assignment = SchoolClassSubject.find(params[:id])
     end
 
     def authorize_admin!
