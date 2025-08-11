@@ -26,5 +26,13 @@ Rails.application.routes.draw do
     post 'school_classes/:school_class_id/subjects/:subject_id', to: 'school_class_subjects#add'
     delete 'school_classes/:school_class_id/subjects/:subject_id',
            to: 'school_class_subjects#remove'
+    patch 'school_classes/:school_class_id/subjects/:subject_id/teacher',
+          to: 'school_class_subjects#update_teacher'
+
+    resources :school_class_subjects, only: %i[update show destroy] do
+      member do
+        patch :teacher
+      end
+    end
   end
 end

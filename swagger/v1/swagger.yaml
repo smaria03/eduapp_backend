@@ -148,6 +148,55 @@ paths:
                 example:
                   value:
                     error: You need to sign in or sign up before continuing.
+  "/api/school_class_subjects/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    patch:
+      summary: Assign the teacher for a class-subject (admin only)
+      tags:
+      - - SchoolClassSubjects
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Teacher updated successfully
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    message: Teacher updated successfully
+        '422':
+          description: Provided user is not a teacher
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: Provided user is not a teacher
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: You need to sign in or sign up before continuing.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                teacher_id:
+                  type: integer
+              required:
+              - teacher_id
   "/api/school_classes":
     post:
       summary: Create a new school class (admin only)

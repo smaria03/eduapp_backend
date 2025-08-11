@@ -6,3 +6,5 @@ en:
           attributes:
             name:
               invalid_class_format: "must be in the format 1A to 12G"
+            subjects:
+              taken: "already assigned to this class"
