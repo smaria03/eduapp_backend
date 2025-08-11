@@ -2,7 +2,7 @@
 
 module Api
   class UsersController < ApplicationController
-    before_action :authenticate_user!, only: %i[students show create]
+    before_action :authenticate_user!, only: %i[students teachers show create]
     before_action :authorize_admin!, only: [:create]
     def show
       user = User.find_by(id: params[:id])
@@ -46,6 +46,10 @@ module Api
 
     def students
       render json: User.where(role: 'student')
+    end
+
+    def teachers
+      render json: User.where(role: 'teacher')
     end
 
     private

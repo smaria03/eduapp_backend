@@ -11,6 +11,7 @@ Rails.application.routes.draw do
     get 'users/:id', to: 'users#show'
     post 'users', to: 'users#create'
     get 'students', to: 'users#students'
+    get 'teachers', to: 'users#teachers'
 
     resources :school_classes, only: %i[index create show update destroy] do
       member do

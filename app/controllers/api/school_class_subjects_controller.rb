@@ -7,7 +7,14 @@ module Api
     before_action :set_assignment, only: %i[update]
 
     def index_for_class
-      render json: @school_class.subjects.select(:id, :name)
+      scs = @school_class.school_class_subjects.includes(:subject, :teacher)
+      render json: scs.map { |row|
+        {
+          id: row.subject.id,
+          name: row.subject.name,
+          teacher: row.teacher ? { id: row.teacher.id, name: row.teacher.name } : nil
+        }
+      }
     end
 
     def index_for_subject

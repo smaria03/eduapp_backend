@@ -535,6 +535,29 @@ paths:
             application/json:
               example:
                 error: Access denied
+  "/api/teachers":
+    get:
+      summary: Get list of all teachers
+      tags:
+      - - Users
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: teachers retrieved successfully
+          content:
+            application/json:
+              example:
+              - id: 1
+                name: Prenume1 Nume1
+                email: teacher1@example.com
+                role: teacher
+              - id: 2
+                name: Prenume2 Nume2
+                email: teacher2@example.com
+                role: teacher
+        '401':
+          description: unauthorized (no token)
   "/api/users":
     post:
       summary: Create a new user (admin only)
