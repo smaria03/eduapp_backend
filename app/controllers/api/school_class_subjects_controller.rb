@@ -12,6 +12,7 @@ module Api
         {
           id: row.subject.id,
           name: row.subject.name,
+          assignment_id: row.id,
           teacher: row.teacher ? { id: row.teacher.id, name: row.teacher.name } : nil
         }
       }
