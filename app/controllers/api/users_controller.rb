@@ -45,7 +45,24 @@ module Api
     end
 
     def students
-      render json: User.where(role: 'student')
+      stud = User.where(role: 'student')
+
+      if params.key?(:school_class_id)
+        stud =
+          if params[:school_class_id].to_s == 'null'
+            stud.where(school_class_id: nil)
+          else
+            stud.where(school_class_id: params[:school_class_id])
+          end
+      end
+
+      if params[:q].present?
+        q = "%#{params[:q].strip.downcase}%"
+        stud = stud.where('LOWER(name) LIKE ? OR LOWER(email) LIKE ?', q, q)
+      end
+
+      render json: paginate(stud, order: :name,
+                                  as_json_opts: { only: %i[id name email school_class_id] })
     end
 
     def teachers
