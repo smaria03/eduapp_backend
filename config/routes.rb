@@ -40,5 +40,6 @@ Rails.application.routes.draw do
     post   'timetable',          to: 'timetables#create'
     patch  'timetable/:id',      to: 'timetables#update'
     delete 'timetable/:id',      to: 'timetables#destroy'
+    resources :periods, only: [:index]
   end
 end
