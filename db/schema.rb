@@ -10,10 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_08_11_064047) do
+ActiveRecord::Schema.define(version: 2025_08_12_121549) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "periods", force: :cascade do |t|
+    t.time "start_time"
+    t.time "end_time"
+    t.string "label"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["start_time", "end_time"], name: "idx_periods_unique_range", unique: true
+  end
 
   create_table "school_class_subjects", force: :cascade do |t|
     t.bigint "school_class_id", null: false
@@ -42,6 +51,18 @@ ActiveRecord::Schema.define(version: 2025_08_11_064047) do
     t.index ["name"], name: "index_subjects_on_name", unique: true
   end
 
+  create_table "timetable_entries", force: :cascade do |t|
+    t.bigint "assignment_id", null: false
+    t.integer "weekday", null: false
+    t.bigint "period_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["assignment_id", "weekday", "period_id"], name: "idx_unique_assignment_day_period", unique: true
+    t.index ["assignment_id"], name: "index_timetable_entries_on_assignment_id"
+    t.index ["period_id"], name: "index_timetable_entries_on_period_id"
+    t.index ["weekday", "period_id"], name: "idx_timetable_day_period"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -63,5 +84,7 @@ ActiveRecord::Schema.define(version: 2025_08_11_064047) do
   add_foreign_key "school_class_subjects", "school_classes"
   add_foreign_key "school_class_subjects", "subjects"
   add_foreign_key "school_class_subjects", "users", column: "teacher_id"
+  add_foreign_key "timetable_entries", "periods"
+  add_foreign_key "timetable_entries", "school_class_subjects", column: "assignment_id"
   add_foreign_key "users", "school_classes"
 end

@@ -35,5 +35,10 @@ Rails.application.routes.draw do
         patch :teacher
       end
     end
+
+    get    'timetable',          to: 'timetables#index'
+    post   'timetable',          to: 'timetables#create'
+    patch  'timetable/:id',      to: 'timetables#update'
+    delete 'timetable/:id',      to: 'timetables#destroy'
   end
 end

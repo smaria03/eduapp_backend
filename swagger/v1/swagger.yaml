@@ -558,6 +558,197 @@ paths:
                 role: teacher
         '401':
           description: unauthorized (no token)
+  "/api/timetable":
+    get:
+      summary: List timetable entries
+      tags:
+      - - Timetable
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: class_id
+        in: query
+        required: false
+        description: Filter by class id (admin only)
+        schema:
+          type: integer
+      - name: teacher_id
+        in: query
+        required: false
+        description: Filter by teacher id (admin only)
+        schema:
+          type: integer
+      - name: weekday
+        in: query
+        required: false
+        description: Filter by weekday (1=Mon..5=Fri) — available to all roles
+        schema:
+          type: integer
+      - name: period_id
+        in: query
+        required: false
+        description: Filter by period id — available to all roles
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: timetable listed (student sees own class timetable)
+          content:
+            application/json:
+              example:
+              - id: 125
+                weekday: wednesday
+                period_id: 3
+                period_label: '08:00–08:50'
+                start_time: '08:00'
+                end_time: '08:50'
+                class_id: 10
+                class_name: 9A
+                subject_id: 55
+                subject_name: Math
+                teacher_id: 77
+                teacher_name: Prof X
+                assignment_id: 1001
+    post:
+      summary: Create a timetable entry (admin only)
+      tags:
+      - - Timetable
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: timetable entry created
+          content:
+            application/json:
+              example:
+                id: 201
+                weekday: monday
+                period_id: 3
+                period_label: '08:00–08:50'
+                start_time: '08:00'
+                end_time: '08:50'
+                class_id: 10
+                class_name: 9A
+                subject_id: 55
+                subject_name: Math
+                teacher_id: 77
+                teacher_name: Prof X
+                assignment_id: 999
+        '401':
+          description: unauthorized (non-admin)
+          content:
+            application/json:
+              example:
+                error: 'Unauthorized: Admins only'
+        '422':
+          description: validation error (class/teacher overlap)
+          content:
+            application/json:
+              example:
+                errors:
+                - This class already has a lesson in this slot
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - timetable_entry
+              properties:
+                timetable_entry:
+                  type: object
+                  required:
+                  - assignment_id
+                  - weekday
+                  - period_id
+                  properties:
+                    assignment_id:
+                      type: integer
+                      example: 999
+                    weekday:
+                      type: integer
+                      example: 1
+                      description: 1=Mon..5=Fri
+                    period_id:
+                      type: integer
+                      example: 3
+        required: true
+  "/api/timetable/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    patch:
+      summary: Update a timetable entry (admin only)
+      tags:
+      - - Timetable
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: timetable entry updated
+          content:
+            application/json:
+              example:
+                id: 202
+                weekday: friday
+                period_id: 4
+                period_label: '09:00–09:50'
+                start_time: '09:00'
+                end_time: '09:50'
+                class_id: 10
+                class_name: 9A
+                subject_id: 55
+                subject_name: Math
+                teacher_id: 77
+                teacher_name: Prof X
+                assignment_id: 999
+        '401':
+          description: unauthorized (non-admin)
+          content:
+            application/json:
+              example:
+                error: 'Unauthorized: Admins only'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - timetable_entry
+              properties:
+                timetable_entry:
+                  type: object
+                  properties:
+                    weekday:
+                      type: integer
+                      example: 2
+                    period_id:
+                      type: integer
+                      example: 4
+        required: true
+    delete:
+      summary: Delete a timetable entry (admin only)
+      tags:
+      - - Timetable
+      security:
+      - bearer_auth: []
+      responses:
+        '204':
+          description: timetable entry deleted
+          content:
+            application/json:
+              example:
+        '401':
+          description: unauthorized (non-admin)
+          content:
+            application/json:
+              example:
+                error: 'Unauthorized: Admins only'
   "/api/users":
     post:
       summary: Create a new user (admin only)
