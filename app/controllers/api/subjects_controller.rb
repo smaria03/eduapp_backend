@@ -16,6 +16,7 @@ module Api
 
         results = assignments.map do |a|
           {
+            assignment_id: a.id,
             subject_name: a.subject.name,
             class_name: a.school_class.name
           }
