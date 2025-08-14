@@ -480,28 +480,63 @@ paths:
       - - Subjects
       security:
       - bearer_auth: []
+      parameters:
+      - name: teacher_id
+        in: query
+        required: false
+        description: Filter subjects by teacher
+        schema:
+          type: string
       responses:
         '200':
-          description: subjects listed
+          description: subjects listed or filtered by teacher
+          content:
+            application/json:
+              examples:
+                all_subjects:
+                  summary: List of all subjects (admin or no teacher_id)
+                  value:
+                  - id: 1
+                    name: Math
+                  - id: 2
+                    name: Geography
+                teacher_subjects:
+                  summary: Subjects taught by teacher (with teacher_id)
+                  value:
+                  - subject_name: Math
+                    class_name: 9B
+                  - subject_name: Physics
+                    class_name: 10A
+              schema:
+                anyOf:
+                - type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                    required:
+                    - id
+                    - name
+                - type: array
+                  items:
+                    type: object
+                    properties:
+                      subject_name:
+                        type: string
+                      class_name:
+                        type: string
+                    required:
+                    - subject_name
+                    - class_name
+        '404':
+          description: invalid teacher id
           content:
             application/json:
               example:
-              - id: 1
-                name: Math
-              - id: 2
-                name: Geography
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                    name:
-                      type: string
-                  required:
-                  - id
-                  - name
+                error: Teacher not found
   "/api/subjects/{id}":
     parameters:
     - name: id
