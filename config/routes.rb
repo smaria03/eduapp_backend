@@ -41,5 +41,6 @@ Rails.application.routes.draw do
     patch  'timetable/:id',      to: 'timetables#update'
     delete 'timetable/:id',      to: 'timetables#destroy'
     resources :periods, only: [:index]
+    resources :grades, only: %i[index create update destroy]
   end
 end
