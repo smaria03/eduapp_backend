@@ -4,6 +4,26 @@ module Api
     before_action :authorize_admin!, only: %i[create destroy]
 
     def index
+      if params[:teacher_id].present?
+        teacher_id = params[:teacher_id]
+
+        teacher = User.find_by(id: teacher_id, role: 'teacher')
+        return render json: { error: 'Teacher not found' }, status: :not_found unless teacher
+
+        assignments = SchoolClassSubject
+                      .includes(:subject, :school_class)
+                      .where(teacher_id: teacher_id)
+
+        results = assignments.map do |a|
+          {
+            subject_name: a.subject.name,
+            class_name: a.school_class.name
+          }
+        end
+
+        return render json: results
+      end
+
       subjects = Subject.order(:name)
       render json: subjects.as_json(only: %i[id name])
     end

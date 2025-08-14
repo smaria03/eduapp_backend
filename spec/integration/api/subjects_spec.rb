@@ -95,24 +95,85 @@ RSpec.describe 'api/subjects', type: :request do
       produces 'application/json'
       security [bearer_auth: []]
 
-      response '200', 'subjects listed' do
-        let!(:_subjects) { create_list(:subject, 2) }
+      parameter name: :teacher_id, in: :query, type: :string, required: false,
+                description: 'Filter subjects by teacher'
 
-        schema type: :array, items: {
-          type: :object,
-          properties: {
-            id: { type: :integer },
-            name: { type: :string }
+      response '200', 'subjects listed or filtered by teacher' do
+        let(:teacher) { create(:user, role: 'teacher') }
+
+        let!(:school_class_1) { create(:school_class, name: '9B') }
+        let!(:school_class_2) { create(:school_class, name: '10A') }
+        let!(:subject_1) { create(:subject, name: 'Math') }
+        let!(:subject_2) { create(:subject, name: 'Physics') }
+
+        let!(:scs_1) do
+          create(:school_class_subject, teacher: teacher, subject: subject_1,
+                                        school_class: school_class_1)
+        end
+        let!(:scs_2) do
+          create(:school_class_subject, teacher: teacher, subject: subject_2,
+                                        school_class: school_class_2)
+        end
+
+        let(:teacher_id) { teacher.id }
+
+        schema anyOf: [
+          {
+            type: :array,
+            items: {
+              type: :object,
+              properties: {
+                id: { type: :integer },
+                name: { type: :string }
+              },
+              required: %w[id name]
+            }
           },
-          required: %w[id name]
-        }
+          {
+            type: :array,
+            items: {
+              type: :object,
+              properties: {
+                subject_name: { type: :string },
+                class_name: { type: :string }
+              },
+              required: %w[subject_name class_name]
+            }
+          }
+        ]
 
         metadata[:response][:content] = {
           'application/json' => {
-            example: [
-              { id: 1, name: 'Math' },
-              { id: 2, name: 'Geography' }
-            ]
+            examples: {
+              all_subjects: {
+                summary: 'List of all subjects (admin or no teacher_id)',
+                value: [
+                  { id: 1, name: 'Math' },
+                  { id: 2, name: 'Geography' }
+                ]
+              },
+              teacher_subjects: {
+                summary: 'Subjects taught by teacher (with teacher_id)',
+                value: [
+                  { subject_name: 'Math', class_name: '9B' },
+                  { subject_name: 'Physics', class_name: '10A' }
+                ]
+              }
+            }
+          }
+        }
+
+        run_test!
+      end
+
+      response '404', 'invalid teacher id' do
+        let(:teacher_id) { 99_999 }
+
+        metadata[:response][:content] = {
+          'application/json' => {
+            example: {
+              error: 'Teacher not found'
+            }
           }
         }
 
