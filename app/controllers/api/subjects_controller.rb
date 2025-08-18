@@ -4,30 +4,11 @@ module Api
     before_action :authorize_admin!, only: %i[create destroy]
 
     def index
-      if params[:teacher_id].present?
-        teacher_id = params[:teacher_id]
+      return render_teacher_subjects(params[:teacher_id]) if params[:teacher_id].present?
 
-        teacher = User.find_by(id: teacher_id, role: 'teacher')
-        return render json: { error: 'Teacher not found' }, status: :not_found unless teacher
+      return render_class_subjects(params[:class_id]) if params[:class_id].present?
 
-        assignments = SchoolClassSubject
-                      .includes(:subject, :school_class)
-                      .where(teacher_id: teacher_id)
-
-        results = assignments.map do |a|
-          {
-            assignment_id: a.id,
-            subject_name: a.subject.name,
-            class_name: a.school_class.name,
-            class_id: a.school_class.id
-          }
-        end
-
-        return render json: results
-      end
-
-      subjects = Subject.order(:name)
-      render json: subjects.as_json(only: %i[id name])
+      render_all_subjects
     end
 
     def create
@@ -57,6 +38,40 @@ module Api
       return if current_user&.role == 'admin'
 
       render json: { error: 'Unauthorized: Admins only' }, status: :unauthorized
+    end
+
+    def render_teacher_subjects(teacher_id)
+      teacher = User.find_by(id: teacher_id, role: 'teacher')
+      return render json: { error: 'Teacher not found' }, status: :not_found unless teacher
+
+      assignments = SchoolClassSubject
+                    .includes(:subject, :school_class)
+                    .where(teacher_id: teacher_id)
+
+      results = assignments.map do |a|
+        {
+          assignment_id: a.id,
+          subject_name: a.subject.name,
+          class_name: a.school_class.name,
+          class_id: a.school_class.id
+        }
+      end
+
+      render json: results
+    end
+
+    def render_class_subjects(class_id)
+      class_id = class_id.to_i
+      school_class = SchoolClass.find_by(id: class_id)
+      return render json: { error: 'Class not found' }, status: :not_found unless school_class
+
+      subjects = school_class.subjects.select(:id, :name)
+      render json: subjects
+    end
+
+    def render_all_subjects
+      subjects = Subject.order(:name)
+      render json: subjects.as_json(only: %i[id name])
     end
   end
 end
