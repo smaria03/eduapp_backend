@@ -18,7 +18,8 @@ module Api
           {
             assignment_id: a.id,
             subject_name: a.subject.name,
-            class_name: a.school_class.name
+            class_name: a.school_class.name,
+            class_id: a.school_class.id
           }
         end
 
