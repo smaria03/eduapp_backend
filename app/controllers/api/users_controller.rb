@@ -8,7 +8,15 @@ module Api
       user = User.find_by(id: params[:id])
 
       if user
-        render json: { id: user.id, name: user.name, role: user.role }
+        json = {
+          id: user.id,
+          name: user.name,
+          role: user.role
+        }
+
+        json[:school_class_id] = user.school_class_id if user.role == 'student'
+
+        render json: json
       else
         render json: { error: 'User not found' }, status: :not_found
       end
