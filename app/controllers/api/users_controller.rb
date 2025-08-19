@@ -73,6 +73,11 @@ module Api
                                   as_json_opts: { only: %i[id name email school_class_id] })
     end
 
+    def students_without_class
+      students = User.where(role: 'student', school_class_id: nil).order(:name)
+      render json: students.as_json(only: %i[id name email])
+    end
+
     def teachers
       render json: User.where(role: 'teacher')
     end
