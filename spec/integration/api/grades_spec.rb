@@ -18,7 +18,7 @@ RSpec.describe 'api/grades', type: :request do
   end
 
   path '/api/grades' do
-    get 'List grades (teachers only, scoped to current teacher)' do
+    get 'List grades (students see their own, teachers see theirs)' do
       tags ['Grades']
       produces 'application/json'
       security [bearer_auth: []]
@@ -55,6 +55,23 @@ RSpec.describe 'api/grades', type: :request do
         example 'application/json', :example, {
           error: 'Unauthorized: Teachers only'
         }
+
+        run_test!
+      end
+
+      response '200', 'Grades retrieved for current student' do
+        let(:Authorization) { "Bearer #{generate_token_for(student)}" }
+
+        let!(:g1) do
+          create(:grade, value: 8, student: student, subject: subject_rec, teacher: teacher)
+        end
+
+        let(:subject_id) { subject_rec.id }
+
+        example 'application/json', :example, [
+          { id: 1, value: 8, student_id: 3, teacher_id: 2, subject_id: 5,
+            created_at: '2025-08-14T13:00:00Z' }
+        ]
 
         run_test!
       end
