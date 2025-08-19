@@ -43,5 +43,6 @@ Rails.application.routes.draw do
     resources :periods, only: [:index]
     resources :grades, only: %i[index create update destroy]
     get 'students/without_class', to: 'users#students_without_class'
+    resources :attendances, only: %i[create index destroy]
   end
 end

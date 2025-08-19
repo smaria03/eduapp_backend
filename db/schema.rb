@@ -10,10 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_08_14_133618) do
+ActiveRecord::Schema.define(version: 2025_08_19_132810) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "attendances", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "assignment_id", null: false
+    t.bigint "period_id", null: false
+    t.date "date"
+    t.integer "status"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["assignment_id"], name: "index_attendances_on_assignment_id"
+    t.index ["period_id"], name: "index_attendances_on_period_id"
+    t.index ["user_id"], name: "index_attendances_on_user_id"
+  end
 
   create_table "grades", force: :cascade do |t|
     t.integer "value"
@@ -93,6 +106,9 @@ ActiveRecord::Schema.define(version: 2025_08_14_133618) do
     t.index ["school_class_id"], name: "index_users_on_school_class_id"
   end
 
+  add_foreign_key "attendances", "periods"
+  add_foreign_key "attendances", "school_class_subjects", column: "assignment_id"
+  add_foreign_key "attendances", "users"
   add_foreign_key "grades", "subjects"
   add_foreign_key "grades", "users", column: "student_id"
   add_foreign_key "grades", "users", column: "teacher_id"

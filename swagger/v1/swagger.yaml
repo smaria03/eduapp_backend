@@ -12,6 +12,148 @@ components:
 security:
 - bearer_auth: []
 paths:
+  "/api/attendances":
+    get:
+      summary: List all attendances (teacher)
+      tags:
+      - - Attendances
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: assignment_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: date
+        in: query
+        format: date
+        required: false
+        schema:
+          type: string
+      - name: user_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Attendances retrieved
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                  - id: 1
+                    user_id: 3
+                    assignment_id: 7
+                    period_id: 1
+                    date: '2025-08-21'
+                    status: present
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: You need to sign in or sign up before continuing.
+    post:
+      summary: Create an attendance (teacher only)
+      tags:
+      - - Attendances
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: Attendance created successfully
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    message: Attendance recorded
+                    attendance:
+                      id: 1
+                      user_id: 3
+                      assignment_id: 7
+                      period_id: 1
+                      date: '2025-08-21'
+                      status: present
+        '422':
+          description: Invalid data or no class scheduled at that time
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    errors:
+                    - No scheduled class for this assignment and period on the given
+                      date
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: You need to sign in or sign up before continuing.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                attendance:
+                  type: object
+                  properties:
+                    user_id:
+                      type: integer
+                    assignment_id:
+                      type: integer
+                    period_id:
+                      type: integer
+                    date:
+                      type: string
+                      format: date
+                    status:
+                      type: string
+                      enum:
+                      - present
+                      - absent
+                  required:
+                  - user_id
+                  - assignment_id
+                  - period_id
+                  - date
+                  - status
+              required:
+              - attendance
+  "/api/attendances/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    delete:
+      summary: Delete an attendance (teacher only)
+      tags:
+      - - Attendances
+      security:
+      - bearer_auth: []
+      responses:
+        '204':
+          description: Attendance deleted
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: You need to sign in or sign up before continuing.
   "/api/grades":
     get:
       summary: List grades (students see their own, teachers see theirs)
