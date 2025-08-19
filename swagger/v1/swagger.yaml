@@ -14,7 +14,7 @@ security:
 paths:
   "/api/grades":
     get:
-      summary: List grades (teachers only, scoped to current teacher)
+      summary: List grades (students see their own, teachers see theirs)
       tags:
       - - Grades
       security:
@@ -32,7 +32,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: Grades retrieved for current teacher
+          description: Grades retrieved for current student
           content:
             application/json:
               examples:

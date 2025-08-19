@@ -1,17 +1,22 @@
 module Api
   class GradesController < ApplicationController
     before_action :authenticate_user!
-    before_action :authorize_teacher!
+    before_action :authorize_teacher!, only: %i[create update destroy]
     before_action :set_grade, only: %i[update destroy]
     before_action :check_ownership!, only: %i[update destroy]
 
     def index
-      grades = Grade.where(teacher_id: current_user.id)
-      grades = grades.where(student_id: params[:student_id]) if params[:student_id].present?
-      grades = grades.where(subject_id: params[:subject_id]) if params[:subject_id].present?
+      grades =
+        case current_user.role
+        when 'student'
+          grades_for_student(current_user)
+        when 'teacher'
+          grades_for_teacher(current_user)
+        else
+          render json: { error: 'Unauthorized' }, status: :unauthorized and return
+        end
 
-      render json: grades.as_json(only: %i[id value student_id teacher_id subject_id
-                                           created_at])
+      render json: grades.as_json(only: %i[id value student_id teacher_id subject_id created_at])
     end
 
     def create
@@ -87,6 +92,19 @@ module Api
       end
 
       true
+    end
+
+    def grades_for_student(student)
+      grades = Grade.where(student_id: student.id)
+      grades = grades.where(subject_id: params[:subject_id]) if params[:subject_id].present?
+      grades
+    end
+
+    def grades_for_teacher(teacher)
+      grades = Grade.where(teacher_id: teacher.id)
+      grades = grades.where(student_id: params[:student_id]) if params[:student_id].present?
+      grades = grades.where(subject_id: params[:subject_id]) if params[:subject_id].present?
+      grades
     end
   end
 end
