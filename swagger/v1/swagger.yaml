@@ -14,7 +14,7 @@ security:
 paths:
   "/api/attendances":
     get:
-      summary: List all attendances (teacher)
+      summary: List all attendances (teacher/student)
       tags:
       - - Attendances
       security:

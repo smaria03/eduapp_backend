@@ -1,10 +1,21 @@
 module Api
   class AttendancesController < ApplicationController
     before_action :authenticate_user!
-    before_action :authorize_teacher!
+    before_action :authorize_teacher!, only: %i[create update destroy]
 
     def index
-      attendances = filter_attendances(Attendance.all)
+      if current_user.role == 'teacher'
+        attendances = Attendance
+                        .joins("INNER JOIN school_class_subjects ON school_class_subjects.id = attendances.assignment_id")
+                        .where(school_class_subjects: { teacher_id: current_user.id })
+      elsif current_user.role == 'student'
+        attendances = Attendance.where(user_id: current_user.id)
+      else
+        return render json: { error: 'Unauthorized role' }, status: :unauthorized
+      end
+
+      attendances = filter_attendances(attendances)
+
       render json: attendances
     end
 

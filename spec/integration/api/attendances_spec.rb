@@ -21,7 +21,7 @@ RSpec.describe 'api/attendances', type: :request do
   end
 
   path '/api/attendances' do
-    get 'List all attendances (teacher)' do
+    get 'List all attendances (teacher/student)' do
       tags ['Attendances']
       produces 'application/json'
       security [bearer_auth: []]
