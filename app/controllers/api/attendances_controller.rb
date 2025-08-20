@@ -4,14 +4,7 @@ module Api
     before_action :authorize_teacher!
 
     def index
-      attendances = Attendance.all
-
-      attendances = attendances.where(user_id: params[:user_id]) if params[:user_id].present?
-      if params[:assignment_id].present?
-        attendances = attendances.where(assignment_id: params[:assignment_id])
-      end
-      attendances = attendances.where(date: params[:date]) if params[:date].present?
-
+      attendances = filter_attendances(Attendance.all)
       render json: attendances
     end
 
@@ -37,7 +30,7 @@ module Api
       end
 
       attendance.destroy
-      render json: { message: 'Attendance deleted successfully' }, status: :ok
+      head :no_content
     end
 
     private
@@ -50,6 +43,14 @@ module Api
       return if current_user&.role == 'teacher'
 
       render json: { error: 'Unauthorized: Teachers only' }, status: :unauthorized
+    end
+
+    def filter_attendances(scope)
+      scope = scope.where(user_id: params[:user_id]) if params[:user_id].present?
+      scope = scope.where(assignment_id: params[:assignment_id]) if params[:assignment_id].present?
+      scope = scope.where(date: params[:date]) if params[:date].present?
+      scope = scope.where(status: params[:status]) if params[:status].present?
+      scope
     end
   end
 end

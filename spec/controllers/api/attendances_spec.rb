@@ -169,8 +169,7 @@ describe 'Attendances API', type: :request do
         delete "/api/attendances/#{attendance.id}", headers: { 'Authorization' => "Bearer #{@teacher_token}" }
       end.to change(Attendance, :count).by(-1)
 
-      expect(response).to have_http_status(:ok)
-      expect(response.parsed_body['message']).to eq('Attendance deleted successfully')
+      expect(response).to have_http_status(:no_content)
     end
 
     it 'returns 403 when another teacher tries to delete' do

@@ -36,6 +36,15 @@ paths:
         required: false
         schema:
           type: integer
+      - name: status
+        in: query
+        enum:
+        - present
+        - absent
+        required: false
+        schema:
+          type: string
+        description: ":\n * `present` \n * `absent` \n "
       responses:
         '200':
           description: Attendances retrieved

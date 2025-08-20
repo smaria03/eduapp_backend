@@ -6,7 +6,8 @@ RSpec.describe 'api/attendances', type: :request do
   let(:subject_rec) { create(:subject) }
   let(:school_class) { create(:school_class) }
   let(:assignment) do
-    create(:school_class_subject, school_class: school_class, subject: subject_rec, teacher: teacher)
+    create(:school_class_subject, school_class: school_class, subject: subject_rec,
+                                  teacher: teacher)
   end
   let(:period) { create(:period) }
   let(:date) { Date.new(2025, 8, 21) }
@@ -28,10 +29,13 @@ RSpec.describe 'api/attendances', type: :request do
       parameter name: :assignment_id, in: :query, type: :integer, required: false
       parameter name: :date, in: :query, type: :string, format: :date, required: false
       parameter name: :user_id, in: :query, type: :integer, required: false
+      parameter name: :status, in: :query, type: :string, enum: %w[present absent],
+                required: false
 
       response '200', 'Attendances retrieved' do
         before do
-          create(:attendance, user: student, assignment: assignment, period: period, date: date, status: :present)
+          create(:attendance, user: student, assignment: assignment, period: period, date: date,
+                              status: :present)
         end
 
         example 'application/json', :example, [
@@ -75,7 +79,7 @@ RSpec.describe 'api/attendances', type: :request do
               assignment_id: { type: :integer },
               period_id: { type: :integer },
               date: { type: :string, format: :date },
-              status: { type: :string, enum: ['present', 'absent'] }
+              status: { type: :string, enum: %w[present absent] }
             },
             required: %w[user_id assignment_id period_id date status]
           }
@@ -163,7 +167,8 @@ RSpec.describe 'api/attendances', type: :request do
       security [bearer_auth: []]
 
       let(:attendance) do
-        create(:attendance, user: student, assignment: assignment, period: period, date: date, status: :absent)
+        create(:attendance, user: student, assignment: assignment, period: period, date: date,
+                            status: :absent)
       end
       let(:id) { attendance.id }
 
