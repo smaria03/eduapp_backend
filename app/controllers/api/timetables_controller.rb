@@ -73,6 +73,9 @@ module Api
     def apply_common_filters(scope)
       scope = scope.where(weekday: params[:weekday]) if params[:weekday].present?
       scope = scope.where(period_id: params[:period_id]) if params[:period_id].present?
+      if params[:assignment_id].present?
+        scope = scope.where(school_class_subjects: { id: params[:assignment_id] })
+      end
       scope
     end
 
