@@ -10,7 +10,13 @@ module Api
                       ON school_class_subjects.id = attendances.assignment_id')
                       .where(school_class_subjects: { teacher_id: current_user.id })
       elsif current_user.role == 'student'
-        attendances = Attendance.where(user_id: current_user.id)
+        attendances = Attendance
+                      .joins(:assignment)
+                      .where(user_id: current_user.id)
+        if params[:subject_id].present?
+          attendances = attendances.where(school_class_subjects:
+                                            { subject_id: params[:subject_id] })
+        end
       else
         return render json: { error: 'Unauthorized role' }, status: :unauthorized
       end
