@@ -6,8 +6,9 @@ module Api
     def index
       if current_user.role == 'teacher'
         attendances = Attendance
-                        .joins("INNER JOIN school_class_subjects ON school_class_subjects.id = attendances.assignment_id")
-                        .where(school_class_subjects: { teacher_id: current_user.id })
+                      .joins('INNER JOIN school_class_subjects
+                      ON school_class_subjects.id = attendances.assignment_id')
+                      .where(school_class_subjects: { teacher_id: current_user.id })
       elsif current_user.role == 'student'
         attendances = Attendance.where(user_id: current_user.id)
       else
