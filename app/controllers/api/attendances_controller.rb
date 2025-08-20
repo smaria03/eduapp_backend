@@ -11,9 +11,31 @@ module Api
     def create
       attendance = Attendance.new(attendance_params)
 
+      unless attendance.assignment.teacher_id == current_user.id
+        return render json: { error: 'Not authorized to create this attendance' },
+                      status: :forbidden
+      end
+
       if attendance.save
         render json: { message: 'Attendance recorded successfully', attendance: attendance },
                status: :created
+      else
+        render json: { errors: attendance.errors.full_messages }, status: :unprocessable_entity
+      end
+    end
+
+    def update
+      attendance = Attendance.find_by(id: params[:id])
+
+      return render json: { error: 'Attendance not found' }, status: :not_found unless attendance
+
+      unless attendance.assignment.teacher_id == current_user.id
+        return render json: { error: 'Not authorized to update this attendance' },
+                      status: :forbidden
+      end
+
+      if attendance.update(status_only_params)
+        render json: { message: 'Attendance updated successfully', attendance: attendance }
       else
         render json: { errors: attendance.errors.full_messages }, status: :unprocessable_entity
       end
@@ -39,6 +61,10 @@ module Api
       params.require(:attendance).permit(:user_id, :assignment_id, :period_id, :date, :status)
     end
 
+    def status_only_params
+      params.require(:attendance).permit(:status)
+    end
+
     def authorize_teacher!
       return if current_user&.role == 'teacher'
 
@@ -46,10 +72,9 @@ module Api
     end
 
     def filter_attendances(scope)
-      scope = scope.where(user_id: params[:user_id]) if params[:user_id].present?
-      scope = scope.where(assignment_id: params[:assignment_id]) if params[:assignment_id].present?
-      scope = scope.where(date: params[:date]) if params[:date].present?
-      scope = scope.where(status: params[:status]) if params[:status].present?
+      %i[user_id assignment_id date period_id status].each do |key|
+        scope = scope.where(key => params[key]) if params[key].present?
+      end
       scope
     end
   end
