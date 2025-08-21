@@ -360,6 +360,107 @@ paths:
                 example:
                   value:
                     error: You need to sign in or sign up before continuing.
+  "/api/learning_materials":
+    get:
+      summary: List teacher’s learning materials
+      tags:
+      - - Learning Materials
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: assignment_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Materials retrieved for current teacher
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                  - id: 1
+                    title: PDF 1
+                    desc:
+                    uploaded_at: '2025-08-21T10:00:00Z'
+                    assignment_id: 1
+                    file_url: http://localhost:3000/rails/active_storage/blobs/xyz...
+        '401':
+          description: Unauthorized (non-teacher)
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: 'Unauthorized: Teachers only'
+    post:
+      summary: Upload a material (only if teacher owns assignment)
+      tags:
+      - - Learning Materials
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: Material uploaded successfully
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    message: Material uploaded successfully
+                    material:
+                      id: 1
+                      title: Lesson 1
+                      desc: Intro material
+                      assignment_id: 1
+                      created_at: '2025-08-21T08:30:45.034Z'
+                      updated_at: '2025-08-21T08:30:45.116Z'
+        '401':
+          description: Unauthorized if not teacher of assignment
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: Not authorized to upload materials for this assignment
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: string
+  "/api/learning_materials/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    delete:
+      summary: Delete a material (only by owning teacher)
+      tags:
+      - - Learning Materials
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Material deleted successfully
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    message: Material deleted successfully
+        '401':
+          description: Unauthorized if not owning teacher
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: Not authorized to delete this material
   "/api/school_classes/{school_class_id}/subjects/{subject_id}":
     parameters:
     - name: school_class_id
