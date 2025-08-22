@@ -58,10 +58,13 @@ describe 'LearningMaterials API', type: :request do
 
   describe 'GET /api/learning_materials' do
     let!(:material1) do
-      create(:learning_material, assignment: assignment, title: 'Material A').tap do |m|
-        m.file.attach(io: Rails.root.join('spec/fixtures/files/sample.pdf').open,
-                      filename: 'sample.pdf', content_type: 'application/pdf')
-      end
+      material = build(:learning_material, assignment: assignment, title: 'Material A')
+      material.file.attach(
+        io: Rails.root.join('spec/fixtures/files/sample.pdf').open,
+        filename: 'sample.pdf',
+        content_type: 'application/pdf'
+      )
+      material.save!
     end
 
     it 'returns only materials uploaded for teacher’s assignments' do
@@ -83,10 +86,14 @@ describe 'LearningMaterials API', type: :request do
 
   describe 'DELETE /api/learning_materials/:id' do
     let!(:material) do
-      create(:learning_material, assignment: assignment, title: 'To delete').tap do |m|
-        m.file.attach(io: Rails.root.join('spec/fixtures/files/sample.pdf').open,
-                      filename: 'sample.pdf', content_type: 'application/pdf')
-      end
+      m = build(:learning_material, assignment: assignment, title: 'To delete')
+      m.file.attach(
+        io: Rails.root.join('spec/fixtures/files/sample.pdf').open,
+        filename: 'sample.pdf',
+        content_type: 'application/pdf'
+      )
+      m.save!
+      m
     end
 
     it 'allows deletion if teacher owns assignment' do

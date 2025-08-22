@@ -27,12 +27,14 @@ RSpec.describe 'api/learning_materials', type: :request do
 
       response '200', 'Materials retrieved for current teacher' do
         let!(:material) do
-          create(:learning_material, title: 'PDF 1', assignment: assignment).tap do |m|
-            m.file.attach(
-              io: Rails.root.join('spec/fixtures/files/sample.pdf').open,
-              filename: 'sample.pdf', content_type: 'application/pdf'
-            )
-          end
+          m = build(:learning_material, title: 'PDF 1', assignment: assignment)
+          m.file.attach(
+            io: Rails.root.join('spec/fixtures/files/sample.pdf').open,
+            filename: 'sample.pdf',
+            content_type: 'application/pdf'
+          )
+          m.save!
+          m
         end
 
         example 'application/json', :example, [
@@ -130,10 +132,14 @@ RSpec.describe 'api/learning_materials', type: :request do
       produces 'application/json'
 
       let!(:material) do
-        create(:learning_material, assignment: assignment).tap do |m|
-          m.file.attach(io: Rails.root.join('spec/fixtures/files/sample.pdf').open,
-                        filename: 'sample.pdf', content_type: 'application/pdf')
-        end
+        material = build(:learning_material, assignment: assignment)
+        material.file.attach(
+          io: Rails.root.join('spec/fixtures/files/sample.pdf').open,
+          filename: 'sample.pdf',
+          content_type: 'application/pdf'
+        )
+        material.save!
+        material
       end
       let(:id) { material.id }
 
