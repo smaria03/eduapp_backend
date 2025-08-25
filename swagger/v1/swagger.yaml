@@ -461,6 +461,151 @@ paths:
                 example:
                   value:
                     error: Not authorized to delete this material
+  "/api/quizzes":
+    get:
+      summary: List quizzes for teacher
+      tags:
+      - - Quizzes
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: assignment_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Quizzes retrieved
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              examples:
+                unauthenticated:
+                  value:
+                    error: You need to sign in or sign up before continuing.
+        '404':
+          description: Assignment not found
+    post:
+      summary: Create a quiz (teacher only)
+      tags:
+      - - Quizzes
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: Quiz created successfully
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    message: Quiz created successfully
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    errors:
+                    - Title can't be blank
+                    - Deadline can't be blank
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              examples:
+                unauth:
+                  value:
+                    error: You need to sign in or sign up before continuing.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quiz:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    deadline:
+                      type: string
+                      format: date
+                    time_limit:
+                      type: integer
+                    assignment_id:
+                      type: integer
+                    questions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          question_text:
+                            type: string
+                          point_value:
+                            type: integer
+                          options:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                text:
+                                  type: string
+                                is_correct:
+                                  type: boolean
+                              required:
+                              - text
+                              - is_correct
+                        required:
+                        - question_text
+                        - point_value
+                        - options
+                  required:
+                  - title
+                  - deadline
+                  - time_limit
+                  - assignment_id
+                  - questions
+              required:
+              - quiz
+  "/api/quizzes/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    delete:
+      summary: Delete a quiz (teacher only)
+      tags:
+      - - Quizzes
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Quiz deleted
+        '401':
+          description: Not authorized
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Not authorized to delete this quiz
+        '404':
+          description: Quiz not found
+          content:
+            application/json:
+              examples:
+                not_found:
+                  value:
+                    error: Quiz not found
   "/api/school_classes/{school_class_id}/subjects/{subject_id}":
     parameters:
     - name: school_class_id

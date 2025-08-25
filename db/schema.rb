@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_08_21_080153) do
+ActiveRecord::Schema.define(version: 2025_08_22_110810) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -87,6 +87,57 @@ ActiveRecord::Schema.define(version: 2025_08_21_080153) do
     t.index ["start_time", "end_time"], name: "idx_periods_unique_range", unique: true
   end
 
+  create_table "quiz_answers", force: :cascade do |t|
+    t.bigint "quiz_submission_id", null: false
+    t.bigint "quiz_question_id", null: false
+    t.integer "selected_option_ids", default: [], array: true
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["quiz_question_id"], name: "index_quiz_answers_on_quiz_question_id"
+    t.index ["quiz_submission_id"], name: "index_quiz_answers_on_quiz_submission_id"
+  end
+
+  create_table "quiz_options", force: :cascade do |t|
+    t.bigint "quiz_question_id", null: false
+    t.string "text"
+    t.boolean "is_correct"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["quiz_question_id"], name: "index_quiz_options_on_quiz_question_id"
+  end
+
+  create_table "quiz_questions", force: :cascade do |t|
+    t.bigint "quiz_id", null: false
+    t.text "question_text"
+    t.float "point_value"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["quiz_id"], name: "index_quiz_questions_on_quiz_id"
+  end
+
+  create_table "quiz_submissions", force: :cascade do |t|
+    t.bigint "quiz_id", null: false
+    t.bigint "student_id", null: false
+    t.datetime "submitted_at"
+    t.float "raw_score"
+    t.float "final_score"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["quiz_id"], name: "index_quiz_submissions_on_quiz_id"
+    t.index ["student_id"], name: "index_quiz_submissions_on_student_id"
+  end
+
+  create_table "quizzes", force: :cascade do |t|
+    t.string "title"
+    t.text "description"
+    t.datetime "deadline"
+    t.integer "time_limit"
+    t.bigint "assignment_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["assignment_id"], name: "index_quizzes_on_assignment_id"
+  end
+
   create_table "school_class_subjects", force: :cascade do |t|
     t.bigint "school_class_id", null: false
     t.bigint "subject_id", null: false
@@ -153,6 +204,13 @@ ActiveRecord::Schema.define(version: 2025_08_21_080153) do
   add_foreign_key "grades", "users", column: "student_id"
   add_foreign_key "grades", "users", column: "teacher_id"
   add_foreign_key "learning_materials", "school_class_subjects", column: "assignment_id"
+  add_foreign_key "quiz_answers", "quiz_questions"
+  add_foreign_key "quiz_answers", "quiz_submissions"
+  add_foreign_key "quiz_options", "quiz_questions"
+  add_foreign_key "quiz_questions", "quizzes"
+  add_foreign_key "quiz_submissions", "quizzes"
+  add_foreign_key "quiz_submissions", "users", column: "student_id"
+  add_foreign_key "quizzes", "school_class_subjects", column: "assignment_id"
   add_foreign_key "school_class_subjects", "school_classes"
   add_foreign_key "school_class_subjects", "subjects"
   add_foreign_key "school_class_subjects", "users", column: "teacher_id"
