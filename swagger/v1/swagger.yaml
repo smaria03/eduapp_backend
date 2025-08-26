@@ -587,9 +587,14 @@ paths:
                     error: 'Unauthorized: Students only'
   "/api/quizzes":
     get:
-      summary: List quizzes for teacher
+      summary: List quizzes (for teacher or student)
+      operationId: getQuizzes
       tags:
       - - Quizzes
+      description: |
+        Returns quizzes based on the current user's role:
+        - Teachers receive full quizzes (including correct answers)
+        - Students receive quizzes **without** revealing which options are correct
       security:
       - bearer_auth: []
       parameters:
@@ -600,7 +605,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: Quizzes retrieved
+          description: Quizzes retrieved for teacher or student
         '401':
           description: Unauthenticated
           content:
@@ -610,7 +615,7 @@ paths:
                   value:
                     error: You need to sign in or sign up before continuing.
         '404':
-          description: Assignment not found
+          description: Assignment not found or unauthorized
     post:
       summary: Create a quiz (teacher only)
       tags:
