@@ -461,6 +461,130 @@ paths:
                 example:
                   value:
                     error: Not authorized to delete this material
+  "/api/quizzes/submissions":
+    get:
+      summary: Get all quiz submissions for current student
+      tags:
+      - - Quiz Submissions
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: subject_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: List of submissions retrieved
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: 'Unauthorized: Students only'
+  "/api/quizzes/{quiz_id}/submissions":
+    post:
+      summary: Submit answers for a quiz (student only)
+      tags:
+      - - Quiz Submissions
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: quiz_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '201':
+          description: Quiz submitted successfully
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    message: Quiz submitted successfully
+                    raw_score: 4
+                    final_score: 5
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: 'Unauthorized: Students only'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    error: Invalid option(s) selected for question 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      question_id:
+                        type: integer
+                      selected_option_ids:
+                        type: array
+                        items:
+                          type: integer
+                    required:
+                    - question_id
+                    - selected_option_ids
+              required:
+              - answers
+  "/api/quizzes/submissions/{id}":
+    delete:
+      summary: Delete a quiz submission (student only)
+      tags:
+      - - Quiz Submissions
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Submission deleted
+          content:
+            application/json:
+              examples:
+                deleted:
+                  value:
+                    message: Submission and associated answers deleted successfully
+        '404':
+          description: Submission not found or not yours
+          content:
+            application/json:
+              examples:
+                not_found:
+                  value:
+                    error: Submission not found or not yours
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              examples:
+                unauth:
+                  value:
+                    error: 'Unauthorized: Students only'
   "/api/quizzes":
     get:
       summary: List quizzes for teacher

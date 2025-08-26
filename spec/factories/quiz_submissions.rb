@@ -1,8 +1,8 @@
 FactoryBot.define do
-  factory :quiz_submission do
-    quiz { nil }
-    student { nil }
-    submitted_at { '2025-08-22 13:56:31' }
+  factory :quiz_submission, class: 'Quiz::QuizSubmission' do
+    association :quiz, factory: :quiz
+    association :student, factory: :user
+    submitted_at { Time.current }
     raw_score { 1.5 }
     final_score { 1.5 }
   end
