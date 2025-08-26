@@ -92,18 +92,35 @@ module Api
       end
 
       def quizzes_for_student
-        if params[:assignment_id]
-          assignment = SchoolClassSubject.find_by(id: params[:assignment_id])
-          return nil unless assignment
-          return nil unless assignment.school_class_id == current_user.school_class_id
-
-          ::Quiz::Quiz.where(assignment_id: assignment.id)
+        if params[:subject_id]
+          quizzes_by_subject
+        elsif params[:assignment_id]
+          quizzes_by_assignment
         else
-          student_assignment_ids = SchoolClassSubject
-                                   .where(school_class_id: current_user.school_class_id)
-                                   .pluck(:id)
-          ::Quiz::Quiz.where(assignment_id: student_assignment_ids)
+          quizzes_for_entire_class
         end
+      end
+
+      def quizzes_by_subject
+        SchoolClassSubject
+          .where(subject_id: params[:subject_id], school_class_id: current_user.school_class_id)
+          .includes(:quizzes)
+          .flat_map(&:quizzes)
+      end
+
+      def quizzes_by_assignment
+        assignment = SchoolClassSubject.find_by(id: params[:assignment_id])
+        return nil unless assignment&.school_class_id == current_user.school_class_id
+
+        ::Quiz::Quiz.where(assignment_id: assignment.id)
+      end
+
+      def quizzes_for_entire_class
+        assignment_ids = SchoolClassSubject
+                         .where(school_class_id: current_user.school_class_id)
+                         .pluck(:id)
+
+        ::Quiz::Quiz.where(assignment_id: assignment_ids)
       end
 
       def unauthorized_response
