@@ -51,5 +51,6 @@ Rails.application.routes.draw do
     namespace :quizzes do
       resources :submissions, only: %i[index destroy], controller: 'quiz_submissions'
     end
+    resources :homeworks, only: %i[create index destroy]
   end
 end
