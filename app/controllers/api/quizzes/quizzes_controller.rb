@@ -1,37 +1,46 @@
 module Api
   module Quizzes
     class QuizzesController < ApplicationController
-      before_action :authorize_teacher!
+      before_action :authorize_teacher!, except: [:index]
 
       def index
-        if params[:assignment_id]
-          assignment = SchoolClassSubject.find_by(id: params[:assignment_id])
+        if current_user&.teacher?
+          quizzes = quizzes_for_teacher
+          return render_assignment_error if quizzes.nil?
 
-          unless assignment
-            return render json: { error: 'Assignment not found' },
-                          status: :not_found
-          end
-          return unauthorized_response unless authorized_teacher?(assignment)
-
-          quizzes = ::Quiz::Quiz.where(assignment_id: assignment.id)
-        else
-          teacher_assignment_ids = SchoolClassSubject.where(teacher_id: current_user.id).pluck(:id)
-          quizzes = ::Quiz::Quiz.where(assignment_id: teacher_assignment_ids)
-        end
-
-        render json: quizzes.as_json(
-          only: %i[id title description deadline time_limit assignment_id],
-          include: {
-            questions: {
-              only: %i[id question_text point_value],
-              include: {
-                options: {
-                  only: %i[id text is_correct]
+          render json: quizzes.as_json(
+            only: %i[id title description deadline time_limit assignment_id],
+            include: {
+              questions: {
+                only: %i[id question_text point_value],
+                include: {
+                  options: {
+                    only: %i[id text is_correct]
+                  }
                 }
               }
             }
-          }
-        )
+          )
+        elsif current_user&.student?
+          quizzes = quizzes_for_student
+          return render_assignment_error if quizzes.nil?
+
+          render json: quizzes.as_json(
+            only: %i[id title description deadline time_limit assignment_id],
+            include: {
+              questions: {
+                only: %i[id question_text point_value],
+                include: {
+                  options: {
+                    only: %i[id text]
+                  }
+                }
+              }
+            }
+          )
+        else
+          render json: { error: 'Unauthorized' }, status: :unauthorized
+        end
       end
 
       def create
@@ -69,9 +78,63 @@ module Api
         assignment&.teacher_id == current_user.id
       end
 
+      def quizzes_for_teacher
+        if params[:assignment_id]
+          assignment = SchoolClassSubject.find_by(id: params[:assignment_id])
+          return nil unless assignment
+          return nil unless authorized_teacher?(assignment)
+
+          ::Quiz::Quiz.where(assignment_id: assignment.id)
+        else
+          teacher_assignment_ids = SchoolClassSubject.where(teacher_id: current_user.id).pluck(:id)
+          ::Quiz::Quiz.where(assignment_id: teacher_assignment_ids)
+        end
+      end
+
+      def quizzes_for_student
+        if params[:subject_id]
+          quizzes_by_subject
+        elsif params[:assignment_id]
+          quizzes_by_assignment
+        else
+          quizzes_for_entire_class
+        end
+      end
+
+      def quizzes_by_subject
+        SchoolClassSubject
+          .where(subject_id: params[:subject_id], school_class_id: current_user.school_class_id)
+          .includes(:quizzes)
+          .flat_map(&:quizzes)
+      end
+
+      def quizzes_by_assignment
+        assignment = SchoolClassSubject.find_by(id: params[:assignment_id])
+        return nil unless assignment&.school_class_id == current_user.school_class_id
+
+        ::Quiz::Quiz.where(assignment_id: assignment.id)
+      end
+
+      def quizzes_for_entire_class
+        assignment_ids = SchoolClassSubject
+                         .where(school_class_id: current_user.school_class_id)
+                         .pluck(:id)
+
+        ::Quiz::Quiz.where(assignment_id: assignment_ids)
+      end
+
       def unauthorized_response
         render json: { error: 'Not authorized to create quizzes for this assignment' },
                status: :unauthorized
+      end
+
+      def unauthorized_response_student
+        render json: { error: 'Not authorized to access this quiz' },
+               status: :unauthorized
+      end
+
+      def render_assignment_error
+        render json: { error: 'Assignment not found or unauthorized' }, status: :not_found
       end
 
       def build_quiz

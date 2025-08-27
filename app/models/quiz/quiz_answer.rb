@@ -7,6 +7,8 @@ module Quiz
     belongs_to :question, class_name: 'Quiz::QuizQuestion', foreign_key: 'quiz_question_id',
                           inverse_of: :answers
 
+    attribute :selected_option_ids, :integer, array: true
+
     validates :selected_option_ids, presence: true
   end
 end

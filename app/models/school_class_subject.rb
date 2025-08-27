@@ -3,6 +3,12 @@ class SchoolClassSubject < ApplicationRecord
   belongs_to :subject
   belongs_to :teacher, class_name: 'User', optional: true
 
+  has_many :quizzes,
+           class_name: 'Quiz::Quiz',
+           foreign_key: :assignment_id,
+           inverse_of: :assignment,
+           dependent: :destroy
+
   validates :school_class_id, uniqueness: { scope: :subject_id }
   validates :subject_id,
             uniqueness: { scope: :school_class_id }

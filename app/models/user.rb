@@ -18,4 +18,12 @@ class User < ApplicationRecord
                           dependent: :destroy
   has_many :grades_received, class_name: 'Grade', foreign_key: 'student_id', inverse_of: :teacher,
                              dependent: :destroy
+
+  def teacher?
+    role == 'teacher'
+  end
+
+  def student?
+    role == 'student'
+  end
 end

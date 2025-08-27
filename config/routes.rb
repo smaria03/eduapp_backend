@@ -45,6 +45,11 @@ Rails.application.routes.draw do
     get 'students/without_class', to: 'users#students_without_class'
     resources :attendances, only: %i[create index destroy update]
     resources :learning_materials, only: %i[create index destroy]
-    resources :quizzes, only: %i[create destroy index], module: :quizzes
+    resources :quizzes, module: :quizzes, only: %i[create destroy index] do
+      post 'submissions', to: 'quiz_submissions#create'
+    end
+    namespace :quizzes do
+      resources :submissions, only: %i[index destroy], controller: 'quiz_submissions'
+    end
   end
 end

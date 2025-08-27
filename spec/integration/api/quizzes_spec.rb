@@ -14,22 +14,56 @@ RSpec.describe 'api/quizzes', type: :request do
   before { assignment }
 
   path '/api/quizzes' do
-    get 'List quizzes for teacher' do
+    get 'List quizzes (for teacher or student)' do
+      operationId 'getQuizzes'
       tags ['Quizzes']
+      description <<~DESC
+        Returns quizzes based on the current user's role:
+        - Teachers receive full quizzes (including correct answers)
+        - Students receive quizzes **without** revealing which options are correct
+      DESC
       produces 'application/json'
       security [bearer_auth: []]
 
       parameter name: :assignment_id, in: :query, type: :integer, required: false
 
-      response '200', 'Quizzes retrieved' do
+      response '200', 'Quizzes retrieved for teacher or student' do
+        let(:Authorization) { "Bearer #{generate_token_for(user)}" }
+
+        let(:user) { teacher } # default, will override later
+
         let!(:quiz) do
           create(:quiz, assignment: assignment).tap do |q|
             question = create(:quiz_question, quiz: q)
-            create(:quiz_option, question: question)
+            create(:quiz_option, question: question, text: 'Correct', is_correct: true)
+            create(:quiz_option, question: question, text: 'Wrong', is_correct: false)
           end
         end
 
-        run_test!
+        context 'when teacher' do
+          let(:user) { teacher }
+
+          run_test! do |response|
+            data = JSON.parse(response.body)
+            option_keys = data.first['questions'].first['options'].first.keys
+            expect(option_keys).to include('id', 'text', 'is_correct')
+          end
+        end
+
+        context 'when student' do
+          let(:user) { student }
+
+          before do
+            student.update!(school_class: assignment.school_class)
+          end
+
+          run_test! do |response|
+            data = JSON.parse(response.body)
+            option_keys = data.first['questions'].first['options'].first.keys
+            expect(option_keys).to include('id', 'text')
+            expect(option_keys).not_to include('is_correct')
+          end
+        end
       end
 
       response '401', 'Unauthenticated' do
@@ -42,8 +76,9 @@ RSpec.describe 'api/quizzes', type: :request do
         run_test!
       end
 
-      response '404', 'Assignment not found' do
+      response '404', 'Assignment not found or unauthorized' do
         let(:assignment_id) { 99_999 }
+        let(:Authorization) { "Bearer #{generate_token_for(teacher)}" }
 
         run_test!
       end
