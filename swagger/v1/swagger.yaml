@@ -360,6 +360,120 @@ paths:
                 example:
                   value:
                     error: You need to sign in or sign up before continuing.
+  "/api/homeworks":
+    get:
+      summary: List teacher’s homeworks
+      tags:
+      - - Homeworks
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: assignment_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Homeworks retrieved for current teacher
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                  - id: 1
+                    title: Tema 1
+                    description:
+                    deadline: '2025-09-10'
+                    assignment_id: 1
+        '401':
+          description: Unauthorized (non-teacher)
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: 'Unauthorized: Teachers only'
+    post:
+      summary: Create a homework (only if teacher owns assignment)
+      tags:
+      - - Homeworks
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: Homework created successfully
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    id: 1
+                    title: Tema 1
+                    description: Exerciții capitolul 2
+                    deadline: '2025-09-10'
+                    assignment_id: 1
+        '401':
+          description: Unauthorized if not teacher of assignment
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: Not authorized to upload homeworks for this assignment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                homework:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    deadline:
+                      type: string
+                      format: date
+                    assignment_id:
+                      type: integer
+                  required:
+                  - title
+                  - deadline
+                  - assignment_id
+  "/api/homeworks/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    delete:
+      summary: Delete a homework (only by owning teacher)
+      tags:
+      - - Homeworks
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Homework deleted successfully
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    message: Homework deleted successfully
+        '401':
+          description: Unauthorized if not owning teacher
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: Not authorized to delete this homework
   "/api/learning_materials":
     get:
       summary: List teacher’s learning materials

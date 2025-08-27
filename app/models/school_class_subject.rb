@@ -9,6 +9,12 @@ class SchoolClassSubject < ApplicationRecord
            inverse_of: :assignment,
            dependent: :destroy
 
+  has_many :homeworks,
+           class_name: 'Homework',
+           foreign_key: :assignment_id,
+           inverse_of: :assignment,
+           dependent: :destroy
+
   validates :school_class_id, uniqueness: { scope: :subject_id }
   validates :subject_id,
             uniqueness: { scope: :school_class_id }
