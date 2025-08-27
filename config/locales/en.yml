@@ -12,3 +12,7 @@ en:
           attributes:
             user_id:
               already_recorded_for_slot: "already has attendance recorded for this class/period/date"
+        homework_submission:
+          attributes:
+            student:
+              already_submitted: has already submitted this homework

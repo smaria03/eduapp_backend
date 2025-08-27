@@ -360,6 +360,142 @@ paths:
                 example:
                   value:
                     error: You need to sign in or sign up before continuing.
+  "/api/homework_submissions":
+    get:
+      summary: List student's homework submissions (optionally filter by subject_id)
+      tags:
+      - - Homework Submissions
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: subject_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Filtered by subject_id
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                  - id: 1
+                    homework_id: 4
+                    homework_title: HW 1
+                    homework_description: Do ex 1-5
+                    deadline: '2025-08-30'
+                    file_attached: true
+                    grade:
+        '401':
+          description: Unauthorized (non-student)
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: 'Unauthorized: Students only'
+    post:
+      summary: Submit homework (student uploads a file)
+      tags:
+      - - Homework Submissions
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: Homework submitted successfully
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    message: Homework submitted successfully
+        '404':
+          description: Homework not found
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: Homework not found
+        '403':
+          description: 'Forbidden: student not in assignment class'
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: You are not allowed to submit this homework for this class
+        '422':
+          description: Already submitted
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: Homework already submitted
+        '401':
+          description: Unauthorized (non-student)
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: 'Unauthorized: Students only'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: integer
+        required: true
+  "/api/homework_submissions/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    delete:
+      summary: Delete own submission (student only)
+      tags:
+      - - Homework Submissions
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Submission deleted successfully
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    message: Homework submission deleted successfully
+        '404':
+          description: Not found or not owned by current student
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: Submission not found or not yours
+        '403':
+          description: Cannot delete a graded submission
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: Cannot delete a graded submission
+        '401':
+          description: Unauthorized (non-student)
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: 'Unauthorized: Students only'
   "/api/homeworks":
     get:
       summary: List teacher’s homeworks
