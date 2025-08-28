@@ -1,16 +1,11 @@
 module Api
   class LearningMaterialsController < ApplicationController
     before_action :authenticate_user!
-    before_action :authorize_teacher!
+    before_action :authorize_teacher!, except: [:index]
+    before_action :authorize_user!, only: [:index]
 
     def index
-      materials = LearningMaterial
-                  .joins(:assignment)
-                  .where(school_class_subjects: { teacher_id: current_user.id })
-
-      if params[:assignment_id].present?
-        materials = materials.where(assignment_id: params[:assignment_id])
-      end
+      materials = fetch_materials
 
       results = materials.map do |material|
         {
@@ -69,6 +64,43 @@ module Api
       return if current_user&.role == 'teacher'
 
       render json: { error: 'Unauthorized: Teachers only' }, status: :unauthorized
+    end
+
+    def authorize_user!
+      return if current_user&.teacher? || current_user&.student?
+
+      render json: { error: 'Unauthorized' }, status: :unauthorized
+    end
+
+    def fetch_materials
+      return materials_for_teacher if current_user.teacher?
+      return materials_for_student if current_user.student?
+
+      render json: { error: 'Unauthorized' }, status: :unauthorized and return
+    end
+
+    def materials_for_teacher
+      materials = LearningMaterial
+                  .joins(:assignment)
+                  .where(school_class_subjects: { teacher_id: current_user.id })
+
+      if params[:assignment_id].present?
+        materials = materials.where(assignment_id: params[:assignment_id])
+      end
+
+      materials
+    end
+
+    def materials_for_student
+      materials = LearningMaterial
+                  .joins(assignment: :subject)
+                  .where(school_class_subjects: { school_class_id: current_user.school_class_id })
+
+      if params[:subject_id].present?
+        materials = materials.where(school_class_subjects: { subject_id: params[:subject_id] })
+      end
+
+      materials
     end
   end
 end

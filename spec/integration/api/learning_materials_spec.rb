@@ -18,7 +18,7 @@ RSpec.describe 'api/learning_materials', type: :request do
   end
 
   path '/api/learning_materials' do
-    get 'List teacher’s learning materials' do
+    get 'List learning materials (teacher or student)' do
       tags ['Learning Materials']
       produces 'application/json'
       security [bearer_auth: []]
@@ -51,6 +51,34 @@ RSpec.describe 'api/learning_materials', type: :request do
         run_test!
       end
 
+      response '200', 'Materials retrieved for student' do
+        let(:Authorization) { "Bearer #{generate_token_for(student)}" }
+
+        let!(:material) do
+          m = build(:learning_material, title: 'PDF for Student', assignment: assignment)
+          m.file.attach(
+            io: Rails.root.join('spec/fixtures/files/sample.pdf').open,
+            filename: 'sample.pdf',
+            content_type: 'application/pdf'
+          )
+          m.save!
+          m
+        end
+
+        example 'application/json', :example, [
+          {
+            id: 1,
+            title: 'PDF for Student',
+            desc: nil,
+            uploaded_at: '2025-08-21T10:00:00Z',
+            assignment_id: 1,
+            file_url: 'http://localhost:3000/rails/active_storage/blobs/xyz...'
+          }
+        ]
+
+        run_test!
+      end
+
       response '401', 'Unauthenticated' do
         let(:Authorization) { nil }
 
@@ -61,12 +89,30 @@ RSpec.describe 'api/learning_materials', type: :request do
         run_test!
       end
 
-      response '401', 'Unauthorized (non-teacher)' do
-        let(:Authorization) { "Bearer #{generate_token_for(create(:user, :student))}" }
+      response '200', 'Materials retrieved for student' do
+        let(:Authorization) { "Bearer #{generate_token_for(student)}" }
 
-        example 'application/json', :example, {
-          error: 'Unauthorized: Teachers only'
-        }
+        let!(:material) do
+          m = build(:learning_material, title: 'PDF for Student', assignment: assignment)
+          m.file.attach(
+            io: Rails.root.join('spec/fixtures/files/sample.pdf').open,
+            filename: 'sample.pdf',
+            content_type: 'application/pdf'
+          )
+          m.save!
+          m
+        end
+
+        example 'application/json', :example, [
+          {
+            id: 1,
+            title: 'PDF for Student',
+            desc: nil,
+            uploaded_at: '2025-08-21T10:00:00Z',
+            assignment_id: 1,
+            file_url: 'http://localhost:3000/rails/active_storage/blobs/xyz...'
+          }
+        ]
 
         run_test!
       end
@@ -80,8 +126,11 @@ RSpec.describe 'api/learning_materials', type: :request do
 
       parameter name: :title, in: :formData, type: :string
       parameter name: :desc, in: :formData, type: :string
-      parameter name: :assignment_id, in: :formData, type: :integer
       parameter name: :file, in: :formData, type: :file
+      parameter name: :assignment_id, in: :query, type: :integer,
+                required: false, description: 'Used by teacher to filter materials'
+      parameter name: :subject_id, in: :query, type: :integer,
+                required: false, description: 'Used by student to filter materials'
 
       response '201', 'Material uploaded successfully' do
         let(:title) { 'Lesson 1' }

@@ -511,25 +511,25 @@ paths:
           type: integer
       responses:
         '200':
-          description: Homeworks retrieved for current teacher
+          description: Homeworks retrieved for student
           content:
             application/json:
               examples:
                 example:
                   value:
                   - id: 1
-                    title: Tema 1
+                    title: Tema elev
                     description:
-                    deadline: '2025-09-10'
+                    deadline: '2025-09-15'
                     assignment_id: 1
         '401':
-          description: Unauthorized (non-teacher)
+          description: Unauthenticated
           content:
             application/json:
               examples:
                 example:
                   value:
-                    error: 'Unauthorized: Teachers only'
+                    error: You need to sign in or sign up before continuing.
     post:
       summary: Create a homework (only if teacher owns assignment)
       tags:
@@ -612,7 +612,7 @@ paths:
                     error: Not authorized to delete this homework
   "/api/learning_materials":
     get:
-      summary: List teacher’s learning materials
+      summary: List learning materials (teacher or student)
       tags:
       - - Learning Materials
       security:
@@ -625,33 +625,45 @@ paths:
           type: integer
       responses:
         '200':
-          description: Materials retrieved for current teacher
+          description: Materials retrieved for student
           content:
             application/json:
               examples:
                 example:
                   value:
                   - id: 1
-                    title: PDF 1
+                    title: PDF for Student
                     desc:
                     uploaded_at: '2025-08-21T10:00:00Z'
                     assignment_id: 1
                     file_url: http://localhost:3000/rails/active_storage/blobs/xyz...
         '401':
-          description: Unauthorized (non-teacher)
+          description: Unauthenticated
           content:
             application/json:
               examples:
                 example:
                   value:
-                    error: 'Unauthorized: Teachers only'
+                    error: You need to sign in or sign up before continuing.
     post:
       summary: Upload a material (only if teacher owns assignment)
       tags:
       - - Learning Materials
       security:
       - bearer_auth: []
-      parameters: []
+      parameters:
+      - name: assignment_id
+        in: query
+        required: false
+        description: Used by teacher to filter materials
+        schema:
+          type: integer
+      - name: subject_id
+        in: query
+        required: false
+        description: Used by student to filter materials
+        schema:
+          type: integer
       responses:
         '201':
           description: Material uploaded successfully
