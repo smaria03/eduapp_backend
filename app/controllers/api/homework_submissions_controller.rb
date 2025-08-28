@@ -1,6 +1,7 @@
 module Api
   class HomeworkSubmissionsController < ApplicationController
-    before_action :authorize_student!
+    before_action :authorize_student!, only: %i[index create destroy]
+    before_action :authorize_teacher!, only: [:grade]
 
     def index
       submissions = filtered_submissions_for_student
@@ -40,12 +41,36 @@ module Api
       render json: { message: 'Homework submission deleted successfully' }, status: :ok
     end
 
+    def grade
+      submission = HomeworkSubmission.find_by(id: params[:id])
+      return render json: { error: 'Submission not found' }, status: :not_found unless submission
+
+      assignment = submission.homework.assignment
+      unless assignment.teacher_id == current_user.id
+        return render json: { error: 'Unauthorized: Not your homework' },
+                      status: :unauthorized
+      end
+
+      if submission.update(grade: params[:grade])
+        render json: { message: 'Grade updated', grade: submission.grade }, status: :ok
+      else
+        render json: { error: submission.errors.full_messages.to_sentence },
+               status: :unprocessable_entity
+      end
+    end
+
     private
 
     def authorize_student!
       return if current_user&.role == 'student'
 
       render json: { error: 'Unauthorized: Students only' }, status: :unauthorized
+    end
+
+    def authorize_teacher!
+      return if current_user&.role == 'teacher'
+
+      render json: { error: 'Unauthorized: Teachers only' }, status: :unauthorized
     end
 
     def filtered_submissions_for_student

@@ -272,4 +272,77 @@ RSpec.describe 'api/homework_submissions', type: :request do
       end
     end
   end
+
+  path '/api/homework_submissions/{id}/grade' do
+    parameter name: :id, in: :path, type: :integer
+
+    patch 'Assign a grade to a submission (teacher only)' do
+      tags ['Homework Submissions']
+      security [bearer_auth: []]
+      consumes 'application/json'
+      produces 'application/json'
+
+      parameter name: :grade, in: :body, schema: {
+        type: :object,
+        properties: {
+          grade: { type: :integer, example: 9 }
+        },
+        required: ['grade']
+      }
+
+      let!(:submission) do
+        s = build(:homework_submission, homework: homework, student: student)
+        s.file.attach(
+          io: Rails.root.join('spec/fixtures/files/sample.pdf').open,
+          filename: 'sample.pdf',
+          content_type: 'application/pdf'
+        )
+        s.save!
+        s
+      end
+
+      let(:id) { submission.id }
+      let(:Authorization) { "Bearer #{generate_token_for(teacher)}" }
+      let(:grade) { { grade: 9 } }
+
+      response '200', 'Grade assigned successfully' do
+        example 'application/json', :success, {
+          message: 'Grade updated',
+          grade: 9
+        }
+
+        run_test!
+      end
+
+      response '401', 'Unauthenticated' do
+        let(:Authorization) { nil }
+
+        example 'application/json', :unauthenticated, {
+          error: 'You need to sign in or sign up before continuing.'
+        }
+
+        run_test!
+      end
+
+      response '401', 'Unauthorized: not the owner teacher' do
+        let(:Authorization) { "Bearer #{generate_token_for(create(:user, :teacher))}" }
+
+        example 'application/json', :unauthorized, {
+          error: 'Unauthorized: Not your homework'
+        }
+
+        run_test!
+      end
+
+      response '422', 'Grade out of allowed range' do
+        let(:grade) { { grade: 20 } }
+
+        example 'application/json', :invalid, {
+          error: 'Grade must be greater than 0 and less than or equal to 10'
+        }
+
+        run_test!
+      end
+    end
+  end
 end
