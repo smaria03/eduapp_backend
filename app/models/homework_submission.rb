@@ -6,6 +6,9 @@ class HomeworkSubmission < ApplicationRecord
   validates :student_id,
             uniqueness: { scope: :homework_id, message: :already_submitted }
   validate :file_attached_and_valid_type
+  validates :grade,
+            numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 10 },
+            allow_nil: true
 
   private
 

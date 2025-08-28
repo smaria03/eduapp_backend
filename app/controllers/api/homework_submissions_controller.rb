@@ -1,10 +1,20 @@
 module Api
   class HomeworkSubmissionsController < ApplicationController
-    before_action :authorize_student!
+    before_action :authorize_student!, only: %i[create destroy]
+    before_action :authorize_teacher!, only: %i[grade delete_grade]
+    before_action :authorize_student_or_teacher!, only: %i[index]
 
     def index
-      submissions = filtered_submissions_for_student
-      render json: format_submissions(submissions)
+      if current_user.teacher? && params[:homework_id].present?
+        submissions = HomeworkSubmission
+                      .includes(:student)
+                      .where(homework_id: params[:homework_id])
+
+        render json: submissions.map { |s| format_teacher_submission(s) }
+      else
+        submissions = filtered_submissions_for_student
+        render json: format_submissions(submissions)
+      end
     end
 
     def create
@@ -40,12 +50,54 @@ module Api
       render json: { message: 'Homework submission deleted successfully' }, status: :ok
     end
 
+    def grade
+      submission = HomeworkSubmission.find_by(id: params[:id])
+      return render json: { error: 'Submission not found' }, status: :not_found unless submission
+
+      assignment = submission.homework.assignment
+      unless assignment.teacher_id == current_user.id
+        return render json: { error: 'Unauthorized: Not your homework' }, status: :unauthorized
+      end
+
+      if submission.update(grade: params[:grade])
+        create_grade_for_submission(submission, assignment)
+        render json: { message: 'Grade updated', grade: submission.grade }, status: :ok
+      else
+        render json: { error: submission.errors.full_messages.to_sentence },
+               status: :unprocessable_entity
+      end
+    end
+
+    def delete_grade
+      submission = HomeworkSubmission.find_by(id: params[:id])
+      return render json: { error: 'Submission not found' }, status: :not_found unless submission
+
+      assignment = submission.homework.assignment
+      unless assignment.teacher_id == current_user.id
+        return render json: { error: 'Unauthorized: Not your homework' },
+                      status: :unauthorized
+      end
+
+      if submission.update(grade: nil)
+        render json: { message: 'Grade removed' }, status: :ok
+      else
+        render json: { error: submission.errors.full_messages.to_sentence },
+               status: :unprocessable_entity
+      end
+    end
+
     private
 
     def authorize_student!
       return if current_user&.role == 'student'
 
       render json: { error: 'Unauthorized: Students only' }, status: :unauthorized
+    end
+
+    def authorize_teacher!
+      return if current_user&.role == 'teacher'
+
+      render json: { error: 'Unauthorized: Teachers only' }, status: :unauthorized
     end
 
     def filtered_submissions_for_student
@@ -101,6 +153,31 @@ module Api
       submission = HomeworkSubmission.new(homework: homework, student: current_user)
       submission.file.attach(params[:file])
       submission
+    end
+
+    def create_grade_for_submission(submission, assignment)
+      Grade.create!(
+        value: params[:grade],
+        student_id: submission.student_id,
+        teacher_id: assignment.teacher_id,
+        subject_id: assignment.subject_id
+      )
+    end
+
+    def format_teacher_submission(submission)
+      {
+        id: submission.id,
+        student_id: submission.student_id,
+        student_name: submission.student.name,
+        uploaded_file_url: submission.file.attached? ? url_for(submission.file) : nil,
+        grade: submission.grade
+      }
+    end
+
+    def authorize_student_or_teacher!
+      return if %w[student teacher].include?(current_user&.role)
+
+      render json: { error: 'Unauthorized: Students or teachers only' }, status: :unauthorized
     end
   end
 end

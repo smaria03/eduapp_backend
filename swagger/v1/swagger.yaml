@@ -496,6 +496,61 @@ paths:
                 example:
                   value:
                     error: 'Unauthorized: Students only'
+  "/api/homework_submissions/{id}/grade":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    patch:
+      summary: Assign a grade to a submission (teacher only)
+      tags:
+      - - Homework Submissions
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Grade assigned successfully
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    message: Grade updated
+                    grade: 9
+        '401':
+          description: 'Unauthorized: not the owner teacher'
+          content:
+            application/json:
+              examples:
+                unauthenticated:
+                  value:
+                    error: You need to sign in or sign up before continuing.
+                unauthorized:
+                  value:
+                    error: 'Unauthorized: Not your homework'
+        '422':
+          description: Grade out of allowed range
+          content:
+            application/json:
+              examples:
+                invalid:
+                  value:
+                    error: Grade must be greater than 0 and less than or equal to
+                      10
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                grade:
+                  type: integer
+                  example: 9
+              required:
+              - grade
   "/api/homeworks":
     get:
       summary: List teacher’s homeworks
