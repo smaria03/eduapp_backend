@@ -1,11 +1,20 @@
 module Api
   class HomeworkSubmissionsController < ApplicationController
-    before_action :authorize_student!, only: %i[index create destroy]
+    before_action :authorize_student!, only: %i[create destroy]
     before_action :authorize_teacher!, only: %i[grade delete_grade]
+    before_action :authorize_student_or_teacher!, only: %i[index]
 
     def index
-      submissions = filtered_submissions_for_student
-      render json: format_submissions(submissions)
+      if current_user.teacher? && params[:homework_id].present?
+        submissions = HomeworkSubmission
+                      .includes(:student)
+                      .where(homework_id: params[:homework_id])
+
+        render json: submissions.map { |s| format_teacher_submission(s) }
+      else
+        submissions = filtered_submissions_for_student
+        render json: format_submissions(submissions)
+      end
     end
 
     def create
@@ -153,6 +162,22 @@ module Api
         teacher_id: assignment.teacher_id,
         subject_id: assignment.subject_id
       )
+    end
+
+    def format_teacher_submission(submission)
+      {
+        id: submission.id,
+        student_id: submission.student_id,
+        student_name: submission.student.name,
+        uploaded_file_url: submission.file.attached? ? url_for(submission.file) : nil,
+        grade: submission.grade
+      }
+    end
+
+    def authorize_student_or_teacher!
+      return if %w[student teacher].include?(current_user&.role)
+
+      render json: { error: 'Unauthorized: Students or teachers only' }, status: :unauthorized
     end
   end
 end

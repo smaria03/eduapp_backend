@@ -83,12 +83,10 @@ RSpec.describe 'api/homework_submissions', type: :request do
         run_test!
       end
 
-      response '401', 'Unauthorized (non-student)' do
+      response '200', 'Returns empty list for teacher without homework_id' do
         let(:Authorization) { "Bearer #{generate_token_for(create(:user, :teacher))}" }
 
-        example 'application/json', :example, {
-          error: 'Unauthorized: Students only'
-        }
+        example 'application/json', :example, []
 
         run_test!
       end
