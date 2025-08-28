@@ -52,5 +52,6 @@ Rails.application.routes.draw do
       resources :submissions, only: %i[index destroy], controller: 'quiz_submissions'
     end
     resources :homeworks, only: %i[create index destroy]
+    resources :homework_submissions, only: %i[create index destroy]
   end
 end

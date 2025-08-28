@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_08_27_090912) do
+ActiveRecord::Schema.define(version: 2025_08_27_120357) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -67,6 +67,17 @@ ActiveRecord::Schema.define(version: 2025_08_27_090912) do
     t.index ["student_id"], name: "index_grades_on_student_id"
     t.index ["subject_id"], name: "index_grades_on_subject_id"
     t.index ["teacher_id"], name: "index_grades_on_teacher_id"
+  end
+
+  create_table "homework_submissions", force: :cascade do |t|
+    t.bigint "homework_id", null: false
+    t.bigint "student_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "grade"
+    t.index ["homework_id", "student_id"], name: "index_homework_submissions_on_homework_id_and_student_id", unique: true
+    t.index ["homework_id"], name: "index_homework_submissions_on_homework_id"
+    t.index ["student_id"], name: "index_homework_submissions_on_student_id"
   end
 
   create_table "homeworks", force: :cascade do |t|
@@ -213,6 +224,8 @@ ActiveRecord::Schema.define(version: 2025_08_27_090912) do
   add_foreign_key "grades", "subjects"
   add_foreign_key "grades", "users", column: "student_id"
   add_foreign_key "grades", "users", column: "teacher_id"
+  add_foreign_key "homework_submissions", "homeworks"
+  add_foreign_key "homework_submissions", "users", column: "student_id"
   add_foreign_key "homeworks", "school_class_subjects", column: "assignment_id"
   add_foreign_key "learning_materials", "school_class_subjects", column: "assignment_id"
   add_foreign_key "quiz_answers", "quiz_questions"
