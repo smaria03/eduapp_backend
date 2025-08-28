@@ -67,8 +67,8 @@ module Api
 
     def homeworks_for_teacher
       scope = Homework
-                .joins(:assignment)
-                .where(school_class_subjects: { teacher_id: current_user.id })
+              .joins(:assignment)
+              .where(school_class_subjects: { teacher_id: current_user.id })
 
       scope = scope.where(assignment_id: params[:assignment_id]) if params[:assignment_id].present?
       scope
@@ -76,10 +76,12 @@ module Api
 
     def homeworks_for_student
       scope = Homework
-                .joins(:assignment)
-                .where(school_class_subjects: { school_class_id: current_user.school_class_id })
+              .joins(:assignment)
+              .where(school_class_subjects: { school_class_id: current_user.school_class_id })
 
-      scope = scope.where(school_class_subjects: { subject_id: params[:subject_id] }) if params[:subject_id].present?
+      if params[:subject_id].present?
+        scope = scope.where(school_class_subjects: { subject_id: params[:subject_id] })
+      end
       scope
     end
 
