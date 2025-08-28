@@ -1,7 +1,7 @@
 module Api
   class HomeworkSubmissionsController < ApplicationController
     before_action :authorize_student!, only: %i[index create destroy]
-    before_action :authorize_teacher!, only: [:grade]
+    before_action :authorize_teacher!, only: %i[grade delete_grade]
 
     def index
       submissions = filtered_submissions_for_student
@@ -47,12 +47,30 @@ module Api
 
       assignment = submission.homework.assignment
       unless assignment.teacher_id == current_user.id
+        return render json: { error: 'Unauthorized: Not your homework' }, status: :unauthorized
+      end
+
+      if submission.update(grade: params[:grade])
+        create_grade_for_submission(submission, assignment)
+        render json: { message: 'Grade updated', grade: submission.grade }, status: :ok
+      else
+        render json: { error: submission.errors.full_messages.to_sentence },
+               status: :unprocessable_entity
+      end
+    end
+
+    def delete_grade
+      submission = HomeworkSubmission.find_by(id: params[:id])
+      return render json: { error: 'Submission not found' }, status: :not_found unless submission
+
+      assignment = submission.homework.assignment
+      unless assignment.teacher_id == current_user.id
         return render json: { error: 'Unauthorized: Not your homework' },
                       status: :unauthorized
       end
 
-      if submission.update(grade: params[:grade])
-        render json: { message: 'Grade updated', grade: submission.grade }, status: :ok
+      if submission.update(grade: nil)
+        render json: { message: 'Grade removed' }, status: :ok
       else
         render json: { error: submission.errors.full_messages.to_sentence },
                status: :unprocessable_entity
@@ -126,6 +144,15 @@ module Api
       submission = HomeworkSubmission.new(homework: homework, student: current_user)
       submission.file.attach(params[:file])
       submission
+    end
+
+    def create_grade_for_submission(submission, assignment)
+      Grade.create!(
+        value: params[:grade],
+        student_id: submission.student_id,
+        teacher_id: assignment.teacher_id,
+        subject_id: assignment.subject_id
+      )
     end
   end
 end

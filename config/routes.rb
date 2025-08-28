@@ -55,6 +55,7 @@ Rails.application.routes.draw do
     resources :homework_submissions, only: %i[create index destroy] do
       member do
         patch :grade
+        delete :delete_grade
       end
     end
   end
