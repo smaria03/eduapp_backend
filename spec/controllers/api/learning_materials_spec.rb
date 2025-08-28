@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe 'LearningMaterials API', type: :request do
   let!(:teacher) { create(:user, :teacher, password: 'teacher123') }
-  let!(:student) { create(:user, :student) }
+  let!(:student) { create(:user, :student, password: 'student123') }
   let!(:subject) { create(:subject) }
   let!(:school_class) { create(:school_class) }
   let!(:assignment) do
@@ -81,6 +81,31 @@ describe 'LearningMaterials API', type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body.length).to eq(1)
+    end
+
+    context 'when logged in as student' do
+      before do
+        post '/api/login', params: { email: student.email, password: 'student123', role: 'student' }
+        expect(response).to have_http_status(:ok)
+        @student_token = response.parsed_body['user']['token']
+      end
+
+      it 'returns materials assigned to student’s class' do
+        get '/api/learning_materials', headers: { 'Authorization' => "Bearer #{@student_token}" }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body).to be_an(Array)
+        expect(response.parsed_body.first['title']).to eq('Material A')
+      end
+
+      it 'filters materials by subject_id' do
+        get "/api/learning_materials?subject_id=#{subject.id}",
+            headers: { 'Authorization' => "Bearer #{@student_token}" }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body.length).to eq(1)
+        expect(response.parsed_body.first['title']).to eq('Material A')
+      end
     end
   end
 
