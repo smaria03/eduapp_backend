@@ -59,5 +59,6 @@ Rails.application.routes.draw do
       end
     end
     get 'class_reports/:id', to: 'class_reports#show'
+    get 'student_reports', to: 'student_reports#show'
   end
 end
