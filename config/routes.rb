@@ -58,5 +58,6 @@ Rails.application.routes.draw do
         delete :delete_grade
       end
     end
+    get 'class_reports/:id', to: 'class_reports#show'
   end
 end
