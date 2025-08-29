@@ -15,6 +15,7 @@ class Attendance < ApplicationRecord
 
   validate :user_belongs_to_assignment_class
   validate :assignment_scheduled_in_timetable
+  validate :date_cannot_be_in_future
 
   private
 
@@ -45,5 +46,13 @@ class Attendance < ApplicationRecord
     return if exists
 
     errors.add(:base, 'No scheduled class for this assignment and period on the given date')
+  end
+
+  def date_cannot_be_in_future
+    return if date.nil?
+
+    return unless date > Time.zone.today
+
+    errors.add(:date, "can't be in the future")
   end
 end
