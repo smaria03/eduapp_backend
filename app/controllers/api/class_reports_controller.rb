@@ -42,12 +42,30 @@ module Api
     end
 
     def average_grades(assignment)
-      raw_averages = Grade.where(
-        subject_id: assignment.subject_id,
-        student_id: assignment.school_class.students.pluck(:id)
-      ).group(:student_id).average(:value)
+      students = assignment.school_class.students
 
-      raw_averages.transform_values { |v| v&.round(2) }
+      grades = Grade
+               .where(subject_id: assignment.subject_id, student_id: students.pluck(:id))
+               .group(:student_id)
+               .average(:value)
+
+      students_with_grades = students.map do |student|
+        {
+          name: student.name,
+          average: grades[student.id]&.round(2)
+        }
+      end
+
+      overall_average = begin
+        grades.values.compact.sum / grades.values.compact.size.to_f
+      rescue StandardError
+        nil
+      end
+
+      {
+        per_student: students_with_grades,
+        class_average: overall_average&.round(2)
+      }
     end
 
     def attendance_stats(assignment)
