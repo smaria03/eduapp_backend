@@ -5,7 +5,8 @@ module Api
     def show
       school_class = SchoolClass.find(params[:id])
       unless teaches_class?(current_user, school_class)
-        render json: { error: 'Unauthorized: You don’t teach this class' }, status: :unauthorized and return
+        render json: { error: 'Unauthorized: You don’t teach this class' },
+               status: :unauthorized and return
       end
 
       students = school_class.students
@@ -48,7 +49,6 @@ module Api
 
       raw_averages.transform_values { |v| v&.round(2) }
     end
-
 
     def attendance_stats(assignment)
       {
