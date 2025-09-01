@@ -288,6 +288,14 @@ RSpec.describe 'api/homework_submissions', type: :request do
         required: ['grade']
       }
 
+      let!(:homework) do
+        create(:homework, assignment: assignment).tap do |hw|
+          # rubocop:disable Rails/SkipsModelValidations
+          hw.update_column(:deadline, 1.day.ago)
+          # rubocop:enable Rails/SkipsModelValidations
+        end
+      end
+
       let!(:submission) do
         s = build(:homework_submission, homework: homework, student: student)
         s.file.attach(
