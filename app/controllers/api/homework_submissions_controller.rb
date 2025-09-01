@@ -58,10 +58,10 @@ module Api
 
     def grade
       submission = HomeworkSubmission.find_by(id: params[:id])
-      return render_not_found('Submission') unless submission
+      return render json: { error: 'Submission not found' }, status: :not_found unless submission
       return render_unauthorized unless teacher_owns_submission?(submission)
       if submission.homework.deadline > Time.current
-        return render_forbidden('You can only grade after the deadline has passed.')
+        return render json: { error: 'You can only grade after the deadline has passed.' }, status: :forbidden
       end
 
       if submission.update(grade: params[:grade])
