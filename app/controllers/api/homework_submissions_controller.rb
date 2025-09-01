@@ -45,6 +45,10 @@ module Api
         return render json: { error: 'Cannot delete a graded submission' }, status: :forbidden
       end
 
+      if submission.homework.deadline < Time.current
+        return render json: { error: 'Cannot delete after the deadline has passed' }, status: :forbidden
+      end
+
       submission.destroy
 
       render json: { message: 'Homework submission deleted successfully' }, status: :ok
@@ -57,6 +61,10 @@ module Api
       assignment = submission.homework.assignment
       unless assignment.teacher_id == current_user.id
         return render json: { error: 'Unauthorized: Not your homework' }, status: :unauthorized
+      end
+
+      if submission.homework.deadline > Time.current
+        return render json: { error: 'You can only grade after the deadline has passed.' }, status: :forbidden
       end
 
       if submission.update(grade: params[:grade])
