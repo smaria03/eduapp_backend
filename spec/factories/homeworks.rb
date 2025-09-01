@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :homework do
     title { 'MyString' }
     description { 'MyText' }
-    deadline { '2025-08-27' }
+    deadline { 3.days.from_now.to_date }
     assignment { nil }
   end
 end
