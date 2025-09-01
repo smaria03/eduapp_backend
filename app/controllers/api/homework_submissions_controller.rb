@@ -1,3 +1,4 @@
+# rubocop:disable Metrics/ClassLength
 module Api
   class HomeworkSubmissionsController < ApplicationController
     before_action :authorize_student!, only: %i[create destroy]
@@ -46,7 +47,8 @@ module Api
       end
 
       if submission.homework.deadline < Time.current
-        return render json: { error: 'Cannot delete after the deadline has passed' }, status: :forbidden
+        return render json: { error: 'Cannot delete after the deadline has passed' },
+                      status: :forbidden
       end
 
       submission.destroy
@@ -56,23 +58,17 @@ module Api
 
     def grade
       submission = HomeworkSubmission.find_by(id: params[:id])
-      return render json: { error: 'Submission not found' }, status: :not_found unless submission
-
-      assignment = submission.homework.assignment
-      unless assignment.teacher_id == current_user.id
-        return render json: { error: 'Unauthorized: Not your homework' }, status: :unauthorized
-      end
-
+      return render_not_found('Submission') unless submission
+      return render_unauthorized unless teacher_owns_submission?(submission)
       if submission.homework.deadline > Time.current
-        return render json: { error: 'You can only grade after the deadline has passed.' }, status: :forbidden
+        return render_forbidden('You can only grade after the deadline has passed.')
       end
 
       if submission.update(grade: params[:grade])
-        create_grade_for_submission(submission, assignment)
+        create_grade_for_submission(submission, submission.homework.assignment)
         render json: { message: 'Grade updated', grade: submission.grade }, status: :ok
       else
-        render json: { error: submission.errors.full_messages.to_sentence },
-               status: :unprocessable_entity
+        render_unprocessable(submission)
       end
     end
 
@@ -187,5 +183,18 @@ module Api
 
       render json: { error: 'Unauthorized: Students or teachers only' }, status: :unauthorized
     end
+
+    def render_unauthorized
+      render json: { error: 'Unauthorized: Not your homework' }, status: :unauthorized
+    end
+
+    def render_unprocessable(record)
+      render json: { error: record.errors.full_messages.to_sentence }, status: :unprocessable_entity
+    end
+
+    def teacher_owns_submission?(submission)
+      submission.homework.assignment.teacher_id == current_user.id
+    end
   end
 end
+# rubocop:enable Metrics/ClassLength
