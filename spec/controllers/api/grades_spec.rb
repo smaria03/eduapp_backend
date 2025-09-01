@@ -8,9 +8,11 @@ describe 'Grades API', type: :request do
   let!(:assignment) do
     create(:school_class_subject, school_class: school_class, subject: subject, teacher: teacher)
   end
+  let!(:period) { create(:period) }
 
   before do
     student.update!(school_class: school_class)
+    create(:timetable_entry, assignment: assignment, period: period, weekday: 1)
 
     post '/api/login', params: { email: teacher.email, password: 'teacher123', role: 'teacher' }
     @teacher_token = response.parsed_body['user']['token']
@@ -35,6 +37,7 @@ describe 'Grades API', type: :request do
     end
 
     it 'fails if teacher is not assigned to subject for that class' do
+      TimetableEntry.where(assignment_id: assignment.id).delete_all
       assignment.destroy
 
       post '/api/grades',

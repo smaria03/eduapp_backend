@@ -100,6 +100,7 @@ RSpec.describe 'api/grades', type: :request do
       }
 
       response '201', 'Grade added successfully' do
+        let!(:timetable_entry) { create(:timetable_entry, assignment: assignment) }
         let(:payload) do
           { grade: { value: 9, student_id: student.id, subject_id: subject_rec.id }}
         end
@@ -190,6 +191,7 @@ RSpec.describe 'api/grades', type: :request do
       }
 
       response '200', 'Grade updated' do
+        let!(:timetable_entry) { create(:timetable_entry, assignment: assignment) }
         let(:payload) { { grade: { value: 10 }} }
 
         example 'application/json', :example, {
@@ -233,6 +235,7 @@ RSpec.describe 'api/grades', type: :request do
       let(:id) { grade.id }
 
       response '204', 'Grade deleted' do
+        let!(:timetable_entry) { create(:timetable_entry, assignment: assignment) }
         run_test!
       end
 

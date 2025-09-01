@@ -91,6 +91,12 @@ module Api
         return false
       end
 
+      unless TimetableEntry.exists?(assignment_id: assignment.id)
+        render json: { error: 'This subject is not scheduled in the timetable for this class.' },
+               status: :forbidden
+        return false
+      end
+
       true
     end
 
