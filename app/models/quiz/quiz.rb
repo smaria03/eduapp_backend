@@ -11,5 +11,6 @@ module Quiz
                            dependent: :destroy
 
     validates :title, presence: true
+    validates :deadline, presence: true
   end
 end

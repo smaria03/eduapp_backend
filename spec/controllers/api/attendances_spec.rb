@@ -9,7 +9,7 @@ describe 'Attendances API', type: :request do
     create(:school_class_subject, school_class: school_class, subject: subject, teacher: teacher)
   end
   let!(:period) { create(:period) }
-  let(:date) { Date.parse('2025-09-09') }
+  let(:date) { Time.zone.today.prev_occurring(:tuesday) }
 
   before do
     student.update!(school_class: school_class)
@@ -124,12 +124,13 @@ describe 'Attendances API', type: :request do
       create(:school_class_subject, school_class: school_class, subject: create(:subject),
                                     teacher: teacher)
     end
-    let(:other_date) { Date.parse('2025-09-10') }
+    let(:other_weekday) { :wednesday }
+    let(:other_date) { Time.zone.today.prev_occurring(other_weekday) }
     let(:other_period) { create(:period, start_time: '10:00', end_time: '10:50') }
 
     before do
       create(:timetable_entry, assignment: other_assignment, period: other_period,
-                               weekday: other_date.wday)
+                               weekday: other_weekday)
     end
 
     let!(:att_other) do

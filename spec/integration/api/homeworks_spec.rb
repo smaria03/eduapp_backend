@@ -148,7 +148,9 @@ RSpec.describe 'api/homeworks', type: :request do
       security [bearer_auth: []]
       produces 'application/json'
 
-      let!(:homework) { create(:homework, assignment: assignment) }
+      let!(:homework) do
+        create(:homework, assignment: assignment, deadline: 5.days.from_now.to_date)
+      end
       let(:id) { homework.id }
 
       response '200', 'Homework deleted successfully' do
