@@ -1,8 +1,11 @@
 module Api
   class SchoolClassesController < ApplicationController
+    include GraduationConcern
+
     before_action :set_school_class, only: %i[show update destroy remove_student add_student]
     before_action :authenticate_user!
-    before_action :authorize_admin!, only: %i[create update destroy remove_student add_student]
+    before_action :authorize_admin!,
+                  only: %i[create update destroy remove_student add_student graduate_all]
 
     def index
       render json: SchoolClass.all
@@ -95,6 +98,44 @@ module Api
 
       student.update(school_class_id: @school_class.id)
       render json: { message: 'Student added successfully' }, status: :ok
+    end
+
+    def graduate_all
+      label = params[:label]
+      classes = SchoolClass.unscoped
+                           .includes(:students, :school_class_subjects)
+                           .where(archived: false)
+                           .sort_by { |cls| -cls.name[/\d+/].to_i }
+
+      ActiveRecord::Base.transaction do
+        classes.each do |school_class|
+          next if school_class.name.start_with?('tmp_')
+
+          school_class.name = "tmp_#{school_class.name}"
+          school_class.save!(validate: false)
+
+          graduate_single_class(school_class, label)
+        end
+      end
+
+      render json: {
+        message: 'Graduation process completed successfully.',
+        graduated_classes: classes.map(&:name)
+      }, status: :ok
+    rescue StandardError => e
+      render json: {
+        message: 'Graduation process failed. No classes were updated.',
+        error: e.message
+      }, status: :unprocessable_entity
+    end
+
+    def graduate_single_class(school_class, label)
+      original_name = school_class.name.delete_prefix('tmp_')
+      students = User.where(school_class_id: school_class.id, role: 'student')
+      data = fetch_graduation_data(school_class, students)
+
+      create_archive(school_class, original_name, data, label)
+      cleanup_and_promote(school_class, original_name, label, students)
     end
 
     private

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_08_27_120357) do
+ActiveRecord::Schema.define(version: 2025_09_02_153915) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -159,6 +159,17 @@ ActiveRecord::Schema.define(version: 2025_08_27_120357) do
     t.index ["assignment_id"], name: "index_quizzes_on_assignment_id"
   end
 
+  create_table "school_class_archives", force: :cascade do |t|
+    t.bigint "school_class_id", null: false
+    t.string "label"
+    t.datetime "archived_at"
+    t.jsonb "data"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["school_class_id", "label"], name: "index_school_class_archives_on_school_class_id_and_label", unique: true
+    t.index ["school_class_id"], name: "index_school_class_archives_on_school_class_id"
+  end
+
   create_table "school_class_subjects", force: :cascade do |t|
     t.bigint "school_class_id", null: false
     t.bigint "subject_id", null: false
@@ -176,6 +187,7 @@ ActiveRecord::Schema.define(version: 2025_08_27_120357) do
     t.string "name"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "archived", default: false, null: false
     t.index ["name"], name: "index_school_classes_on_name", unique: true
   end
 
@@ -210,6 +222,7 @@ ActiveRecord::Schema.define(version: 2025_08_27_120357) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "jti"
     t.bigint "school_class_id"
+    t.boolean "graduated", default: false, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["jti"], name: "index_users_on_jti", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
@@ -235,6 +248,7 @@ ActiveRecord::Schema.define(version: 2025_08_27_120357) do
   add_foreign_key "quiz_submissions", "quizzes"
   add_foreign_key "quiz_submissions", "users", column: "student_id"
   add_foreign_key "quizzes", "school_class_subjects", column: "assignment_id"
+  add_foreign_key "school_class_archives", "school_classes"
   add_foreign_key "school_class_subjects", "school_classes"
   add_foreign_key "school_class_subjects", "subjects"
   add_foreign_key "school_class_subjects", "users", column: "teacher_id"
