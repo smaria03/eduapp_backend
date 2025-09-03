@@ -14,6 +14,10 @@ Rails.application.routes.draw do
     get 'teachers', to: 'users#teachers'
 
     resources :school_classes, only: %i[index create show update destroy] do
+      collection do
+        patch :graduation, to: 'school_classes#graduate_all'
+      end
+
       member do
         post   'add_student/:student_id',    to: 'school_classes#add_student'
         delete 'remove_student/:student_id', to: 'school_classes#remove_student'
@@ -60,5 +64,8 @@ Rails.application.routes.draw do
     end
     get 'class_reports/:id', to: 'class_reports#show'
     get 'student_reports', to: 'student_reports#show'
+    get 'school_class_archives/labels', to: 'school_class_archives#labels'
+    get 'school_class_archives/by_label/:label', to: 'school_class_archives#by_label'
+    get 'school_class_archives/:id', to: 'school_class_archives#show'
   end
 end
