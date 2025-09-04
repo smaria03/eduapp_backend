@@ -67,5 +67,6 @@ Rails.application.routes.draw do
     get 'school_class_archives/labels', to: 'school_class_archives#labels'
     get 'school_class_archives/by_label/:label', to: 'school_class_archives#by_label'
     get 'school_class_archives/:id', to: 'school_class_archives#show'
+    get 'student_archives', to: 'student_archives#show'
   end
 end
