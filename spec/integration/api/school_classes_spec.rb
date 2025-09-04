@@ -281,6 +281,68 @@ RSpec.describe 'api/school_classes', type: :request do
       end
     end
   end
+
+  path '/api/school_classes/graduation' do
+    patch 'Graduate all classes and archive data (admin only)' do
+      tags ['SchoolClasses']
+      consumes 'application/json'
+      produces 'application/json'
+      security [bearer_auth: []]
+
+      parameter name: :payload, in: :body, required: true, schema: {
+        type: :object,
+        properties: {
+          label: { type: :string, example: '2024-2025' }
+        },
+        required: ['label']
+      }
+
+      response '200', 'Graduation completed successfully' do
+        let(:payload) { { label: '2024-2025' } }
+
+        metadata[:response][:content] = {
+          'application/json' => {
+            example: {
+              message: 'Graduation process completed successfully.',
+              graduated_classes: %w[10A 11B]
+            }
+          }
+        }
+
+        run_test!
+      end
+
+      response '422', 'Graduation process failed' do
+        let(:payload) { { label: '' } }
+
+        metadata[:response][:content] = {
+          'application/json' => {
+            example: {
+              message: 'Graduation process failed. No classes were updated.',
+              error: 'Label is required'
+            }
+          }
+        }
+
+        run_test!
+      end
+
+      response '401', 'Unauthorized (non-admin)' do
+        let(:Authorization) { "Bearer #{generate_token_for(create(:user, :teacher))}" }
+        let(:payload) { { label: '2024-2025' } }
+
+        metadata[:response][:content] = {
+          'application/json' => {
+            example: {
+              error: 'Unauthorized: Admins only'
+            }
+          }
+        }
+
+        run_test!
+      end
+    end
+  end
 end
 
 def generate_token_for(user)

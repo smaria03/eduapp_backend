@@ -12,6 +12,150 @@ components:
 security:
 - bearer_auth: []
 paths:
+  "/api/school_class_archives/labels":
+    get:
+      summary: List all archive labels (admin only)
+      tags:
+      - - Archives
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Labels listed
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    labels:
+                    - 2022-2023
+                    - 2023-2024
+        '401':
+          description: Unauthorized (not admin)
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: 'Unauthorized: Admins only'
+  "/api/school_class_archives/by_label/{label}":
+    get:
+      summary: Get all archived classes for a specific label (admin only)
+      tags:
+      - - Archives
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: label
+        in: path
+        description: Archive label
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Archived classes returned
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                  - id: 1
+                    label: 2023-2024
+                    archived_at: '2024-06-15T12:00:00Z'
+                    school_class:
+                      id: 5
+                      current_name: 11A
+                      archived_name: 10A
+        '401':
+          description: Unauthorized (not admin)
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: 'Unauthorized: Admins only'
+  "/api/school_class_archives/{id}":
+    get:
+      summary: Get full details of a specific archive (admin only)
+      tags:
+      - - Archives
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Archive found
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    id: 1
+                    label: 2023-2024
+                    archived_at: '2024-06-15T12:00:00Z'
+                    school_class_id: 5
+                    data:
+                      class_name: 10A
+                      students:
+                      - id: 1
+                        name: Prenume1 Nume1
+                      - id: 2
+                        name: Prenume2 Nume2
+                      assignments:
+                      - subject_id: 3
+                        subject_name: Math
+                      - subject_id: 4
+                        subject_name: Biology
+        '404':
+          description: Archive not found
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: Archive not found
+        '401':
+          description: Unauthorized (not admin)
+  "/api/student_archives":
+    get:
+      summary: Get student's personal archive (student only)
+      tags:
+      - - Archives
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Archive returned
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    2022-2023:
+                      class_name: 10A
+                      subjects:
+                      - subject_id: 1
+                        subject_name: Math
+                        grades:
+                        - id: 1
+                          value: 8
+                          created_at: '2024-06-10T00:00:00Z'
+                        present_count: 40
+                        absent_count: 5
+        '401':
+          description: Unauthorized (not student)
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: 'Unauthorized: Students only'
   "/api/attendances":
     get:
       summary: List all attendances (teacher/student)
@@ -375,7 +519,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: Filtered by subject_id
+          description: Returns empty list for teacher without homework_id
           content:
             application/json:
               examples:
@@ -389,13 +533,13 @@ paths:
                     file_attached: true
                     grade:
         '401':
-          description: Unauthorized (non-student)
+          description: Unauthenticated
           content:
             application/json:
               examples:
                 example:
                   value:
-                    error: 'Unauthorized: Students only'
+                    error: You need to sign in or sign up before continuing.
     post:
       summary: Submit homework (student uploads a file)
       tags:
@@ -1052,6 +1196,94 @@ paths:
                 not_found:
                   value:
                     error: Quiz not found
+  "/api/class_reports/{id}":
+    get:
+      summary: Returns detailed report for a class (teacher only)
+      tags:
+      - - Reports
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: id
+        in: path
+        description: Class ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Class report retrieved
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    class_name: 10B
+                    students_count: 20
+                    subjects:
+                    - subject: Math
+                      grades:
+                        per_student:
+                        - name: Prenume Nume
+                          average: 8.25
+                        class_average: 7.6
+                      attendance:
+                        present: 45
+                        absent: 5
+                      homeworks:
+                      - title: Tema 1
+                        submitted: 18/20
+                        average_grade: 7.5
+                      quizzes:
+                      - title: Test 1
+                        submitted: 19/20
+                        average_score: 8.0
+        '401':
+          description: Teacher not assigned to class
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: 'Unauthorized: You don’t teach this class'
+  "/api/student_reports":
+    get:
+      summary: Returns personal report for a student (student only)
+      tags:
+      - - Reports
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Student report retrieved
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    student_name: Prenume Nume
+                    class_name: 10B
+                    overall_average: 8.2
+                    class_position: 4
+                    total_absences: 3
+                    subjects:
+                    - subject: Math
+                      average: 8.5
+                      absences: 1
+                      homeworks:
+                        submitted: 3
+                        total: 4
+                      quizzes:
+                      - quiz_title: Test 1
+                        score: 9.0
+        '401':
+          description: Unauthorized (not a student)
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    error: 'Unauthorized: Students only'
   "/api/school_classes/{school_class_id}/subjects/{subject_id}":
     parameters:
     - name: school_class_id
@@ -1445,6 +1677,49 @@ paths:
             application/json:
               example:
                 error: Student does not belong to this class
+  "/api/school_classes/graduation":
+    patch:
+      summary: Graduate all classes and archive data (admin only)
+      tags:
+      - - SchoolClasses
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Graduation completed successfully
+          content:
+            application/json:
+              example:
+                message: Graduation process completed successfully.
+                graduated_classes:
+                - 10A
+                - 11B
+        '422':
+          description: Graduation process failed
+          content:
+            application/json:
+              example:
+                message: Graduation process failed. No classes were updated.
+                error: Label is required
+        '401':
+          description: Unauthorized (non-admin)
+          content:
+            application/json:
+              example:
+                error: 'Unauthorized: Admins only'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label:
+                  type: string
+                  example: 2024-2025
+              required:
+              - label
+        required: true
   "/api/students":
     get:
       summary: Get list of all students
