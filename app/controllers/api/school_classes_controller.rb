@@ -101,6 +101,8 @@ module Api
     end
 
     def graduate_all
+      return unless validate_graduation_params?
+
       label = params[:label]
       classes = SchoolClass.unscoped
                            .includes(:students, :school_class_subjects)
@@ -139,6 +141,18 @@ module Api
     end
 
     private
+
+    def validate_graduation_params?
+      if params[:label].blank?
+        render json: {
+          message: 'Graduation process failed. No classes were updated.',
+          error: 'Label is required'
+        }, status: :unprocessable_entity
+        return false
+      end
+
+      true
+    end
 
     def set_school_class
       @school_class = SchoolClass.find(params[:id])
